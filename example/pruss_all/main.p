@@ -28,14 +28,14 @@ MAIN:
  MOV r1, CTPPR_1
  ST32 r0, r1
 
- /* load shared values into r0,r1 ... r7 */
+ /* load shared values into r2,r3 ... r9 */
 
- LBCO r0, CONST_DDR, 0, 32
+ LBCO r2, CONST_DDR, 0, 32
 
  /* setup epwm, adc and timer */
 
  EPWM_SETUP 1
- EPWM_SET_PERIOD 1, 0xfa0
+ EPWM_SET_PERIOD 1, r2
 
  ADC_SETUP 0
 
@@ -44,14 +44,14 @@ MAIN:
  /* main loop */
 
  WHILE_TRUE:
+ EPWM_SET_DUTY 1, r3
  TIMER_WAIT
  ADC_READ 0
- EPWM_SET_DUTY 1, 0x7d0
  JMP WHILE_TRUE
 
- /* store results from r0,r1 ... r7 into host memory */
+ /* store results from r2,r3 ... r9 into host memory */
 
- SBCO r0, CONST_PRUSHAREDRAM, 0, 32
+ SBCO r2, CONST_PRUSHAREDRAM, 0, 32
 
  /* signal cpu we are done (never reached) */
 

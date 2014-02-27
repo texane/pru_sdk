@@ -140,7 +140,7 @@
  /* use r0, r1 */
  /* i is currently ignored, forced to 1 */
 
- MOV32 r0, 0
+ MOV r0, period
  MOV32 r1, EPWM_REG_TBPRD
  SBCO r0, CONST_EHRPWM1, r1, 2
 
@@ -153,7 +153,7 @@
  /* use r0, r1 */
  /* i is currently ignored, forced to 1 */
 
- MOV32 r0, duty
+ MOV r0, duty
  MOV32 r1, EPWM_REG_CMPA
  SBCO r0, CONST_EHRPWM1, r1, 2
 
