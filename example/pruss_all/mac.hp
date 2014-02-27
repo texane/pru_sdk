@@ -1,0 +1,21 @@
+#ifndef MAC_HP_INCLUDED
+#define MAC_HP_INCLUDED
+
+
+.macro MAC_MUL
+.mparam a, b
+
+ /* mutiply only mode (no accumulation) */
+ /* r27:r26 = a * b */
+ /* use r25, r26, r27, r28, r29 */
+
+ MOV r28, a
+ MOV r29, b
+ MOV r25, 0
+ XOUT 0, r25, 1
+ XIN 0, r26, 8
+
+.endm
+
+
+#endif /* ! MAC_HP_INCLUDED */

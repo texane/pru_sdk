@@ -1,0 +1,42 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* identification */
+	part-number = "pwm_p8_36";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			pwm_p8_36: pinmux_pwm_p8_36_pins {
+				pinctrl-single,pins = <0xc8 0x2>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			pwm_test_p8_36 {
+				compatible	= "pwm_test";
+				pwm-names 	= "PWM_p8_36";
+				pinctrl-names	= "default";
+				pinctrl-0	= <&pwm_p8_36>;
+				enabled		= <1>;
+				status 		= "okay";
+			};
+		};
+	};
+
+ 	fragment@2 {
+  		   target = <&pruss>;
+		   __overlay__ {
+		   	       status = "okay";
+
+    	           };
+        };
+
+};
