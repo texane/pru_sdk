@@ -116,6 +116,12 @@ static int cm_per_enable_pwmss(size_t i)
 /* warning: 16 bit registers */
 #define EPWM_REG_PCCTL (PWMSS_EPWM_REG_BASE + 0x3c)
 
+/* doc: spruh73c, table 15.99 */
+/* note: doc < rev. j is wrong, register offset is 0xc0. see this post: */
+/* http://e2e.ti.com/support/embedded/starterware/f/790/p/301065/1139333.aspx */
+/* warning: 16 bit registers */
+#define EPWM_REG_HRCTL (PWMSS_EPWM_REG_BASE + 0xc0)
+
 static int pwmss_open(mio_handle_t* mio, unsigned int i)
 {
   /* i the pwmss id, in [0:2] */
@@ -141,11 +147,12 @@ static int pwmss_close(mio_handle_t* mio)
   return 0;
 }
 
-static int pwmss_set_epwm(mio_handle_t* mio, uint16_t p, uint16_t d)
+static int pwmss_set_epwm(mio_handle_t* mio, uint16_t p, uint16_t d, uint16_t hrd)
 {
   /* mio the pwmss mio region */
   /* p the period */
   /* d the duty */
+  /* hrd the high resolution duty */
 
   /* enable epwm clock */
   mio_or_uint32(mio, PWMSS_REG_CLKCONFIG, 1 << 8);
@@ -155,6 +162,9 @@ static int pwmss_set_epwm(mio_handle_t* mio, uint16_t p, uint16_t d)
   mio_write_uint16(mio, EPWM_REG_TBPHS, 0);
   mio_write_uint16(mio, EPWM_REG_TBPRD, p);
   mio_write_uint16(mio, EPWM_REG_TBCNT, 0);
+
+  mio_write_uint16(mio, EPWM_REG_CMPAHR, hrd << 8);
+  mio_write_uint16(mio, EPWM_REG_HRCTL, 2 << 0);
 
   /* doc: spruh73c, table 15.66 */
   mio_write_uint16(mio, EPWM_REG_CMPCTL, 0);
@@ -191,7 +201,8 @@ int main(int ac, char** av)
     PERROR();
     return -1;
   }
-  pwmss_set_epwm(&mio, 0x1fa0, 0x7d0);
+
+  pwmss_set_epwm(&mio, 0x10, 0x5, 0x60);
   pwmss_close(&mio);
 
   return 0;
