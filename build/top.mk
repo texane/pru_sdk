@@ -8,7 +8,7 @@ STRIP := $(CROSS_COMPILE)strip
 PASM := $(PRU_SDK_DIR)/bin/pasm
 DTC := $(PRU_SDK_DIR)/bin/dtc
 
-C_FLAGS := -Wall -O2 -mtune=cortex-a8 -march=armv7-a
+C_FLAGS += -Wall -O2 -mtune=cortex-a8 -march=armv7-a
 
 C_FLAGS += -I$(PRU_SDK_DIR)/include
 L_FLAGS += -L$(PRU_SDK_DIR)/lib
