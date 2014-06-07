@@ -27,16 +27,15 @@ static void zero_words(size_t n)
   mio_close(&mio);
 }
 
-static int read_words(uint32_t x[8])
+static int read_words(uint32_t* x, size_t n)
 {
   static const size_t sharedram_offset = 2048;
   volatile uint32_t* p;
-  const size_t n = sizeof(x) / sizeof(x[0]);
   size_t i;
 
   prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void**)&p);
 
-  for (i = 0; i != n; ++i) x[i] = p[sharedram_offset + i];
+  for (i = 0; i != 8; ++i) x[i] = p[sharedram_offset + i];
 
   return 0;
 }
@@ -71,7 +70,7 @@ int main(int ac, char** av)
 
   prussdrv_pruintc_init(&pruss_intc_initdata);
 
-  zero_words(n);
+  /* zero_words(n); */
 
   /* TODO: write data from data.bin */
 
@@ -85,10 +84,10 @@ int main(int ac, char** av)
   while (is_sigint == 0)
   {
     usleep(1000000);
-    read_words(x);
+    read_words(x, n);
     for (i = 0; i != n; ++i)
     {
-      printf("0x%08x (%f)\n", x[i], (float)x[i]);
+      printf("0x%08x (%f)\n", x[i], *((float*)(x + i)));
     }
     printf("\n");
   }

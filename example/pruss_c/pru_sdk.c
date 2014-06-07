@@ -19,19 +19,41 @@ void shm_init(void)
   /* PRU0 by setting c28_pointer[15:0] field to 0x0120 */
   /* this will make C28 point to 0x00012000 (PRU shared RAM). */
 
+  /* save r4, r5 */
   __asm__ __volatile__
   (
-   " LDI32 r0, 0x0120 \n"
-   " LDI32 r1, 0x22028 \n"
-   " SBBO &r0, r1, 0x00, 4 \n"
+   " SUB r2, r2, 8 \n"
+   " SBBO &r4, r2, 0, 8 \n"
+  );
+
+  __asm__ __volatile__
+  (
+   " LDI32 r4, 0x0120 \n"
+   " LDI32 r5, 0x22028 \n"
+   " SBBO &r4, r5, 0x00, 4 \n"
+  );
+
+  /* restore r4, r5 */
+  __asm__ __volatile__
+  (
+   " LBBO &r4, r2, 0, 8 \n"
+   " ADD r2, r2, 8 \n"
   );
 }
 
-void shm_write(register uint32_t i, register uint32_t x)
+void shm_write_uint32(register uint32_t i, register uint32_t x)
 {
   /* i is the absolute offset relative from shared memory start */
   /* write x at shm + i */
 
+  __asm__ __volatile__
+  (
+   " SBCO &r15, C28, r14.w0, 4 \n"
+  );
+}
+
+void shm_write_float(register uint32_t i, register float x)
+{
   __asm__ __volatile__
   (
    " SBCO &r15, C28, r14.w0, 4 \n"

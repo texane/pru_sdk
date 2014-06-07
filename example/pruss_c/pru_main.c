@@ -3,9 +3,9 @@
 
 int main(void)
 {
-  volatile float x = 1.3;
+  volatile float x = 3.1415;
 
-  x *= 10;
+  x *= 10.0;
 
   pru_init();
   shm_init();
@@ -13,9 +13,9 @@ int main(void)
   /* i = 0; */
   /* while (1) */
   {
-    shm_write(0, (uint32_t)x);
-    shm_write(4, 0x2b2b2c2d);
-    /* shm_write(8, 0x2c2b2c2d); */
+    shm_write_uint32(0, 0xdeadbeef);
+    shm_write_uint32(4, 0x2b2b2c2d);
+    shm_write_float(8, x);
   }
 
   /* for (i = 0; i != 8; ++i) */
@@ -23,10 +23,7 @@ int main(void)
   /*   shm_write(i * 4, i); */
   /* } */
 
-  __asm__ __volatile__
-  (
-   " HALT \n"
-  );
+  __halt();
 
   return 0;
 }
