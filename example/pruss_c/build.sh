@@ -33,15 +33,19 @@ pru_main.c
 -i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
 -z \
 pru_main.obj pru_sdk.obj -llibc.a \
-am335x.cmd
+-m pru_main.map \
+-o pru_main.elf \
+/segfs/linux/pru_sdk/pru_2.0.0B2/example/AM3359_PRU.cmd
 
 
 # convert to binary file
 
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin/hexpru -i -b ./pru_main.elf -o=pru_main.bin
+/segfs/linux/pru_sdk/pru_2.0.0B2/bin/hexpru \
+/segfs/linux/pru_sdk/pru_2.0.0B2/bin.cmd \
+./pru_main.elf
 
 
 # retrieve main address
 
-export MAIN_ADDR=0x`/segfs/linux/pru_sdk/pru_2.0.0B2/bin/dispru pru_main.elf | grep main: | cut -f1 -d\  `
+export START_ADDR=0x`/segfs/linux/pru_sdk/pru_2.0.0B2/bin/dispru pru_main.elf | grep _c_int00 | cut -f1 -d\  `
 make clean ; make

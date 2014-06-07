@@ -73,10 +73,12 @@ int main(int ac, char** av)
 
   zero_words(n);
 
+  /* TODO: write data from data.bin */
+
   /* execute code on pru0 */
 #define PRU_NUM 0
   printf("< ok\n"); fflush(stdout);
-  prussdrv_exec_program_at(PRU_NUM, "./pru_main.bin", MAIN_ADDR);
+  prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
   printf("> ok\n"); fflush(stdout);
 
   signal(SIGINT, on_sigint);
@@ -84,7 +86,10 @@ int main(int ac, char** av)
   {
     usleep(1000000);
     read_words(x);
-    for (i = 0; i != n; ++i) printf("0x%08x\n", x[i]);
+    for (i = 0; i != n; ++i)
+    {
+      printf("0x%08x (%f)\n", x[i], (float)x[i]);
+    }
     printf("\n");
   }
 

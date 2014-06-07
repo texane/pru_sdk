@@ -3,7 +3,9 @@
 
 int main(void)
 {
-  /* uint32_t i; */
+  volatile float x = 1.3;
+
+  x *= 10;
 
   pru_init();
   shm_init();
@@ -11,12 +13,10 @@ int main(void)
   /* i = 0; */
   /* while (1) */
   {
-    shm_write(0, 0xbeefb00b);
-    /* shm_write(4, 0x2b2b2c2d); */
+    shm_write(0, (uint32_t)x);
+    shm_write(4, 0x2b2b2c2d);
     /* shm_write(8, 0x2c2b2c2d); */
   }
-
-  while (1) ;
 
   /* for (i = 0; i != 8; ++i) */
   /* { */
@@ -27,10 +27,6 @@ int main(void)
   (
    " HALT \n"
   );
-
-  volatile float x = 1.3;
-
-  x *= 2.3;
 
   return 0;
 }
