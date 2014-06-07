@@ -1,23 +1,26 @@
 #!/usr/bin/env sh
 
+export PRU_SDK_DIR=/segfs/linux/pru_sdk
+export PRU_CGT_DIR=$PRU_SDK_DIR/pru_2.0.0B2
+
 
 # compile support library without optimization
 # enabled to keep argument passing convention
 
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin/clpru \
+$PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/include \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
+-i$PRU_CGT_DIR/include \
+-i$PRU_CGT_DIR/lib \
 -c \
 pru_hal.c
 
 
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin/clpru \
+$PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/include \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
+-i$PRU_CGT_DIR/include \
+-i$PRU_CGT_DIR/lib \
 -O3 \
 -c \
 pru_main.c
@@ -26,26 +29,26 @@ pru_main.c
 # compile and link
 # optimizations allowed
 
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin/clpru \
+$PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/include \
--i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
+-i$PRU_CGT_DIR/include \
+-i$PRU_CGT_DIR/lib \
 -z \
 pru_main.obj pru_hal.obj -llibc.a \
 -m pru_main.map \
 -o pru_main.elf \
-/segfs/linux/pru_sdk/pru_2.0.0B2/example/AM3359_PRU.cmd
+$PRU_CGT_DIR/example/AM3359_PRU.cmd
 
 
-# convert to binary file
+# convert ELF to binary file pru_main.bin
 
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin/hexpru \
-/segfs/linux/pru_sdk/pru_2.0.0B2/bin.cmd \
+$PRU_CGT_DIR/bin/hexpru \
+$PRU_CGT_DIR/bin.cmd \
 ./pru_main.elf
 
 
-# retrieve main address
+# build host program
 
-export START_ADDR=0x`/segfs/linux/pru_sdk/pru_2.0.0B2/bin/dispru pru_main.elf | grep _c_int00 | cut -f1 -d\  `
-make clean ; make
+make clean
+make START_ADDR=`./get_start_addr.sh ./pru_main.elf`
