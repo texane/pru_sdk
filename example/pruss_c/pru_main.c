@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "pru_sdk.h"
+#include "pru_hal.h"
 
 int main(void)
 {
@@ -7,7 +7,7 @@ int main(void)
 
   x *= 10.0;
 
-  pru_init();
+  ocp_init();
   shm_init();
 
   /* i = 0; */

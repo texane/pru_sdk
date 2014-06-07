@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 
-void pru_init(void)
+void ocp_init(void)
 {
   /* enable ocp wide access */
 

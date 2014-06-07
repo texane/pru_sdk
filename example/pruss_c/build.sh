@@ -10,7 +10,7 @@
 -i/segfs/linux/pru_sdk/pru_2.0.0B2/include \
 -i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
 -c \
-pru_sdk.c
+pru_hal.c
 
 
 /segfs/linux/pru_sdk/pru_2.0.0B2/bin/clpru \
@@ -32,7 +32,7 @@ pru_main.c
 -i/segfs/linux/pru_sdk/pru_2.0.0B2/include \
 -i/segfs/linux/pru_sdk/pru_2.0.0B2/lib \
 -z \
-pru_main.obj pru_sdk.obj -llibc.a \
+pru_main.obj pru_hal.obj -llibc.a \
 -m pru_main.map \
 -o pru_main.elf \
 /segfs/linux/pru_sdk/pru_2.0.0B2/example/AM3359_PRU.cmd
