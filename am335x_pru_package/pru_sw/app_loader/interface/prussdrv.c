@@ -728,3 +728,60 @@ int prussdrv_exec_code_at(int prunum, const unsigned int *code, int codelen, siz
 
     return 0;
 }
+
+int prussdrv_load_datafile(int prunum, const char *filename)
+{
+    FILE *fPtr;
+    unsigned char fileDataArray[PRUSS_MAX_IRAM_SIZE];
+    int fileSize = 0;
+
+    // Open an File from the hard drive
+    fPtr = fopen(filename, "rb");
+    if (fPtr == NULL) {
+        DEBUG_PRINTF("File %s open failed\n", filename);
+	return -1;
+    } else {
+        DEBUG_PRINTF("File %s open passed\n", filename);
+    }
+    // Read file size
+    fseek(fPtr, 0, SEEK_END);
+    fileSize = ftell(fPtr);
+
+    if (fileSize == 0) {
+        DEBUG_PRINTF("File read failed.. Closing program\n");
+        fclose(fPtr);
+        return -1;
+    }
+
+    fseek(fPtr, 0, SEEK_SET);
+
+    if (fileSize !=
+        fread((unsigned char *) fileDataArray, 1, fileSize, fPtr)) {
+        DEBUG_PRINTF("WARNING: File Size mismatch\n");
+	fclose(fPtr);
+	return -1;
+    }
+
+    fclose(fPtr);
+
+    return prussdrv_load_data(prunum, (const unsigned int *) fileDataArray, fileSize);
+}
+
+int prussdrv_load_data(int prunum, const unsigned int *code, int codelen)
+{
+    unsigned int pru_ram_id;
+
+    if (prunum == 0)
+        pru_ram_id = PRUSS0_PRU0_DATARAM;
+    else if (prunum == 1)
+        pru_ram_id = PRUSS0_PRU1_DATARAM;
+    else
+        return -1;
+
+    // Make sure PRU sub system is first disabled/reset
+    prussdrv_pru_disable(prunum);
+    prussdrv_pru_write_memory(pru_ram_id, 0, code, codelen);
+    //prussdrv_pru_enable(prunum);
+
+    return 0;
+}

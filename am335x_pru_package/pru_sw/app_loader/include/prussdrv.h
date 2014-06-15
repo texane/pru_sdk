@@ -194,6 +194,8 @@ extern "C" {
 
     int prussdrv_exec_code(int prunum, const unsigned int *code, int codelen);
     int prussdrv_exec_code_at(int prunum, const unsigned int *code, int codelen, size_t addr);
+    int prussdrv_load_data(int prunum, const unsigned int *code, int codelen);
+    int prussdrv_load_datafile(int prunum, const char *filename);
 
 #if defined (__cplusplus)
 }

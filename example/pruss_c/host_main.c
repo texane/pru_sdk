@@ -72,13 +72,13 @@ int main(int ac, char** av)
 
   /* zero_words(n); */
 
-  /* TODO: write data from data.bin */
+#define PRU_NUM 0
+
+  /* write data from data.bin */
+  prussdrv_load_datafile(PRU_NUM, "./data.bin");
 
   /* execute code on pru0 */
-#define PRU_NUM 0
-  printf("< ok\n"); fflush(stdout);
   prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
-  printf("> ok\n"); fflush(stdout);
 
   signal(SIGINT, on_sigint);
   while (is_sigint == 0)
