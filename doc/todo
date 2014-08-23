@@ -1,0 +1,7 @@
+[ remove need to set PC code ]
+
+no need to set the PC before starting the execution if the
+following is added to the linker file:
+.text:_c_int00* > 0x0, PAGE 0
+cf. comment at
+http://www.embeddedrelated.com/showarticle/603/using-the-c-language-to-program-the-am335x-pru
