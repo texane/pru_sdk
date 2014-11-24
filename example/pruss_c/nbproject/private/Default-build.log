@@ -1,0 +1,3 @@
+/segfs/linux/dance_sdk/toolchain/arm-buildroot-linux-uclibcgnueabi/bin/arm-buildroot-linux-uclibcgnueabi-gcc -DSTART_ADDR= -Wall -O2 -mtune=cortex-a8 -march=armv7-a -I/home/longqi/pru_sdk/include -c -o host_main.o host_main.c
+make: /segfs/linux/dance_sdk/toolchain/arm-buildroot-linux-uclibcgnueabi/bin/arm-buildroot-linux-uclibcgnueabi-gcc: Command not found
+make: *** [host_main.o] Error 127

@@ -1,6 +1,6 @@
-CROSS_COMPILE ?= /segfs/linux/dance_sdk/toolchain/arm-buildroot-linux-uclibcgnueabi/bin/arm-buildroot-linux-uclibcgnueabi-
+CROSS_COMPILE ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-
 
-PRU_SDK_DIR ?= /segfs/linux/pru_sdk
+PRU_SDK_DIR ?= /home/longqi/pru_sdk
 
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)gcc

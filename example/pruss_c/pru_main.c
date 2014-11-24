@@ -3,24 +3,27 @@
 
 int main(void)
 {
-  volatile float x = 3.1415;
+  volatile float x = 3.1415926;
 
   x *= 10.0;
 
   ocp_init();
   shm_init();
 
-  /* i = 0; */
-  /* while (1) */
+ volatile int i = 0; 
+  while (1) 
   {
     shm_write_uint32(0, 0xdeadbeef);
-    shm_write_uint32(4, 0x2b2b2c2d);
+    shm_write_uint32(4, 0x12345678);
     shm_write_float(8, x);
+    shm_write_float(12, i++);
+
+    
   }
 
   /* for (i = 0; i != 8; ++i) */
   /* { */
-  /*   shm_write(i * 4, i); */
+  //   shm_write(i * 4, i); 
   /* } */
 
   __halt();

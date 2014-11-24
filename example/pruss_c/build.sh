@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-export PRU_SDK_DIR=/segfs/linux/pru_sdk
-export PRU_CGT_DIR=$PRU_SDK_DIR/pru_2.0.0B2
+export PRU_SDK_DIR=/home/longqi/pru_sdk
+export PRU_CGT_DIR=/opt/PRU/ti-cgt-pru_2.1.0
 
 
 # compile support library without optimization
@@ -51,4 +51,4 @@ $PRU_CGT_DIR/bin.cmd \
 # build host program
 
 make clean
-make START_ADDR=`./get_start_addr.sh ./pru_main.elf`
+make  START_ADDR=`./get_start_addr.sh ./pru_main.elf`

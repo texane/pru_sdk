@@ -59,7 +59,9 @@ int main(int ac, char** av)
   uint32_t x[8];
   const size_t n = sizeof(x) / sizeof(x[0]);
   size_t i;
-
+  
+  printf("n: %u \n",n);
+  
   prussdrv_init();
 
   if (prussdrv_open(PRU_EVTOUT_0))
@@ -79,6 +81,7 @@ int main(int ac, char** av)
 
   /* execute code on pru0 */
   prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
+ // prussdrv_exec_program(PRU_NUM, "./text.bin");
 
   signal(SIGINT, on_sigint);
   while (is_sigint == 0)
@@ -87,7 +90,8 @@ int main(int ac, char** av)
     read_words(x, n);
     for (i = 0; i != n; ++i)
     {
-      printf("0x%08x (%f)\n", x[i], *((float*)(x + i)));
+      //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
+      printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
     }
     printf("\n");
   }
