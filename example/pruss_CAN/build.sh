@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-export PRU_SDK_DIR=/home/longqi/pru_sdk
+export PRU_SDK_DIR=`pwd`/../..
 export PRU_CGT_DIR=/opt/PRU/ti-cgt-pru_2.1.0
 
 

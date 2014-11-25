@@ -4,3 +4,5 @@
 *.bin
 *.dtbo
 *.elf
+example/pruss_CAN/main
+example/pruss_CAN/nbproject

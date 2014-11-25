@@ -1,6 +1,11 @@
 #include <stdint.h>
 #include "pru_hal.h"
 
+int init_can()
+{
+
+}
+
 int main(void)
 {
   volatile float x = 3.1415926;
