@@ -1,0 +1,7 @@
+/opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-gcc -DSTART_ADDR= -Wall -O2 -mtune=cortex-a8 -march=armv7-a -I/home/longqi/Dropbox/BBB/PRU/pru_sdk/example/pruss_CAN2/../../include -c -o host_main.o host_main.c
+host_main.c: In function ‘main’:
+host_main.c:80:3: warning: implicit declaration of function ‘prussdrv_load_datafile’ [-Wimplicit-function-declaration]
+host_main.c:83:61: error: expected expression before ‘)’ token
+host_main.c: At top level:
+host_main.c:13:13: warning: ‘zero_words’ defined but not used [-Wunused-function]
+make: *** [host_main.o] Error 1
