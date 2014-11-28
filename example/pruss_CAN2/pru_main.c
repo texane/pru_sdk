@@ -76,6 +76,8 @@
 #include "evmAM335x.h"
 #include "hw_types.h"
 #include "dcan.h"
+#include "pruss.h"
+#include "pru_hal.h"
 
 /******************************************************************************
  **                       INTERNAL MACRO DEFINITIONS
@@ -168,13 +170,21 @@ int main(void) {
     DCANNormalModeSet(SOC_DCAN_0_REGS);
 
     /* Enable the error interrupts */
-    DCANIntEnable(SOC_DCAN_0_REGS, DCAN_ERROR_INT);
+    //  DCANIntEnable(SOC_DCAN_0_REGS, DCAN_ERROR_INT);
 
     /* Enable the interrupt line 0 of DCAN module */
-    DCANIntLineEnable(SOC_DCAN_0_REGS, DCAN_INT_LINE0);
+    //  DCANIntLineEnable(SOC_DCAN_0_REGS, DCAN_INT_LINE0);
 
+    ocp_init();
+    shm_init();
     /* Terminating while loop */
-    while (1);
+    int i = 0;
+    while (1) {
+      //  shm_write_uint32(0, 0xdeadbeef);
+      //  shm_write_uint32(4, 0x12345678);
+        shm_write_uint32(8, i++);
+        // shm_write_float(8, i++);
+    }
 }
 
 /*
@@ -319,7 +329,7 @@ static void DCANIsr0(void) {
 
 /* Interrupt mapping to AINTC and registering CAN ISR */
 static void DCANAintcConfigure(void) {
-#TODO
+    //TODO
     /* Set up the ARM interrupt controller */
     //  IntAINTCInit();
 
@@ -340,4 +350,68 @@ static void DCANAintcConfigure(void) {
 
     /* Enable the system interrupts in AINTC */
     //   IntSystemEnable(SYS_INT_DCAN0_PARITY);
+
+    /*
+        __asm__ __volatile__(
+
+                // #define jumpOffset        r8
+                // #define regPointer        r11
+                // #define regOffset         r12
+                // #define regVal            r17
+                // #define eventStatus       r31
+
+
+                // Initialize pointer to INTC registers
+                " MOV32     regOffset, 0x00000000"
+                // Clear SYS_EVT
+                " MOV32     r31, 0x00000000"
+
+                // Global enable of all host interrupts
+                "  LDI       regVal.w0, 0x0001"
+                "  SBCO      regVal, CONST_PRUSSINTC, GER_OFFSET, 2"
+
+                // Enable host interrupt 0
+                "  MOV32     regVal, (0x00000000 | HOST_NUM)"
+                "  SBCO      regVal, CONST_PRUSSINTC, HIESR_OFFSET, 4"
+
+                // Map channel 0 to host 0
+                "  LDI       regOffset.w0, INTC_HOSTMAP_REGS_OFFSET"
+                "  ADD       regOffset.w0, regOffset.w0, HOST_NUM"
+                "  LDI       regVal.w0, CHN_NUM"
+                "  SBCO      regVal, CONST_PRUSSINTC, regOffset.w0, 1"
+
+                // Map Timer 0 interrupt to channel 0
+                "  LDI       regOffset.w0, INTC_CHNMAP_REGS_OFFSET"
+                "  ADD       regOffset, regOffset, SYS_EVT"
+                "  LDI       regVal.b0, CHN_NUM"
+                "  SBCO      regVal.b0, CONST_PRUSSINTC, regOffset.w0, 1"
+
+                // Set the polarity registers
+                "  MOV32     regPointer, (INTC_REGS_BASE + INTC_SYS_INT_REGS_OFFSET)"
+                "  MOV32     regVal, 0xFFFFFFFF"
+                "  SBBO      regVal, regPointer, 0x00, 4"
+                "  SBBO      regVal, regPointer, 0x04, 4"
+
+                // Set the type registers
+                "  MOV32     regVal, 0x1C000000"
+                "  SBBO      regVal, regPointer, 0x80, 4"
+                "  LDI       regVal.w2, #0x0000"
+                "  SBBO      regVal, regPointer, 0x84, 4"
+
+                // Make sure the Timer 0 system interrupt is cleared
+                "  MOV32     regVal, (0x00000000 | SYS_EVT)"
+                "  SBCO      regVal, CONST_PRUSSINTC, SICR_OFFSET, 4"
+
+                // Enable Timer 0 system interrupt
+                "  SBCO      regVal, CONST_PRUSSINTC, EISR_OFFSET, 4"
+
+                )
+     */
+
+    // map host 0-7 to channel 0-7
+    // HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_HMR1_REG) = 0x03020100;
+    //  HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_HMR2_REG) = 0x07060504;
+
+    //map system event 40,41,42,43 to channel 0 
+    // HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_CMR10_REG) = 0x00000000;
 }

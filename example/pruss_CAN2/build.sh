@@ -24,13 +24,13 @@ $PRU_CGT_DIR/bin/clpru \
 -c \
 dcan_frame.c
 
-#$PRU_CGT_DIR/bin/clpru \
-#--silicon_version=2 \
-#--hardware_mac=on \
-#-i$PRU_CGT_DIR/include \
-#-i$PRU_CGT_DIR/lib \
-#-c \
-#pru_hal.c
+$PRU_CGT_DIR/bin/clpru \
+--silicon_version=2 \
+--hardware_mac=on \
+-i$PRU_CGT_DIR/include \
+-i$PRU_CGT_DIR/lib \
+-c \
+pru_hal.c
 
 
 $PRU_CGT_DIR/bin/clpru \
@@ -52,7 +52,7 @@ $PRU_CGT_DIR/bin/clpru \
 -i$PRU_CGT_DIR/include \
 -i$PRU_CGT_DIR/lib \
 -z \
-pru_main.obj dcan.obj dcan_frame.obj -llibc.a \
+pru_main.obj dcan.obj dcan_frame.obj pru_hal.obj -llibc.a \
 -m pru_main.map \
 -o pru_main.elf \
 $PRU_CGT_DIR/example/AM3359_PRU.cmd

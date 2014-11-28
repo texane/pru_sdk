@@ -7,37 +7,33 @@
 #include "pruss_intc_mapping.h"
 #include "../common/mio.h"
 
-
 /* host pru shared memory */
 
-static void zero_words(size_t n)
-{
-  mio_handle_t mio;
-  size_t i;
+static void zero_words(size_t n) {
+    mio_handle_t mio;
+    size_t i;
 
-  if (mio_open(&mio, 0x80001000, 0x1000))
-  {
-    printf("unable to zero_words\n");
-    return ;
-  }
+    if (mio_open(&mio, 0x80001000, 0x1000)) {
+        printf("unable to zero_words\n");
+        return;
+    }
 
-  for (i = 0; i != n; ++i)
-    mio_write_uint32(&mio, i * sizeof(uint32_t), 0);
+    for (i = 0; i != n; ++i)
+        mio_write_uint32(&mio, i * sizeof (uint32_t), 0);
 
-  mio_close(&mio);
+    mio_close(&mio);
 }
 
-static int read_words(uint32_t* x, size_t n)
-{
-  static const size_t sharedram_offset = 2048;
-  volatile uint32_t* p;
-  size_t i;
+static int read_words(uint32_t* x, size_t n) {
+    static const size_t sharedram_offset = 2048;
+    volatile uint32_t* p;
+    size_t i;
 
-  prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void**)&p);
+    prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void**) &p);
 
-  for (i = 0; i != 8; ++i) x[i] = p[sharedram_offset + i];
+    for (i = 0; i != 8; ++i) x[i] = p[sharedram_offset + i];
 
-  return 0;
+    return 0;
 }
 
 
@@ -45,60 +41,56 @@ static int read_words(uint32_t* x, size_t n)
 
 static volatile unsigned int is_sigint = 0;
 
-static void on_sigint(int x)
-{
-  is_sigint = 1;
+static void on_sigint(int x) {
+    is_sigint = 1;
 }
-
 
 /* main */
 
-int main(int ac, char** av)
-{
-  tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
-  uint32_t x[8];
-  const size_t n = sizeof(x) / sizeof(x[0]);
-  size_t i;
-  
-  printf("n: %u \n",n);
-  
-  prussdrv_init();
+int main(int ac, char** av) {
+    tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
+    uint32_t x[8];
+    const size_t n = sizeof (x) / sizeof (x[0]);
+    size_t i;
+    size_t count = 0;
 
-  if (prussdrv_open(PRU_EVTOUT_0))
-  {
-    printf("prussdrv_open open failed\n");
-    return -1;
-  }
+    printf("n: %u \n", n);
 
-  prussdrv_pruintc_init(&pruss_intc_initdata);
+    prussdrv_init();
 
-  /* zero_words(n); */
+    if (prussdrv_open(PRU_EVTOUT_0)) {
+        printf("prussdrv_open open failed\n");
+        return -1;
+    }
+
+    prussdrv_pruintc_init(&pruss_intc_initdata);
+
+    /* zero_words(n); */
 
 #define PRU_NUM 0
 
-  /* write data from data.bin */
-  prussdrv_load_datafile(PRU_NUM, "./data.bin");
+    /* write data from data.bin */
+    prussdrv_load_datafile(PRU_NUM, "./data.bin");
 
-  /* execute code on pru0 */
-  prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
- // prussdrv_exec_program(PRU_NUM, "./text.bin");
+    /* execute code on pru0 */
+    prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
+    // prussdrv_exec_program(PRU_NUM, "./text.bin");
 
-  signal(SIGINT, on_sigint);
-  while (is_sigint == 0)
-  {
-    usleep(1000000);
-    read_words(x, n);
-    for (i = 0; i != n; ++i)
-    {
-      //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
+    signal(SIGINT, on_sigint);
+    while (is_sigint == 0) {
+        printf("reading count: %d\n",count++);
+        usleep(1000000);
+        read_words(x, n);
+        for (i = 0; i != n; ++i) {
+            //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
       printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
+        }
+        printf("\n");
     }
-    printf("\n");
-  }
 
-  /* disable pru and close memory mapping */
-  prussdrv_pru_disable(PRU_NUM);
-  prussdrv_exit();
+    /* disable pru and close memory mapping */
+    prussdrv_pru_disable(PRU_NUM);
+    prussdrv_exit();
 
-  return 0;
+    return 0;
 }
