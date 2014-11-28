@@ -6,3 +6,6 @@
 *.elf
 example/pruss_CAN/main
 example/pruss_CAN/nbproject
+example/pruss_CAN2/main
+example/pruss_CAN2/pru_main.map
+example/pruss_CAN2/nbproject
