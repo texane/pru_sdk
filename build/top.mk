@@ -1,6 +1,7 @@
 CROSS_COMPILE ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-
 
-PRU_SDK_DIR ?= /home/longqi/pru_sdk
+#PRU_SDK_DIR ?= /home/longqi/pru_sdk
+PRU_SDK_DIR ?= $(shell pwd)/../..
 
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)gcc

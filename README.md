@@ -3,7 +3,8 @@ pru_sdk
 
 am335x pru software development kita
 
-$ tree -d   
+```bash
+$ tree -d
 .
 ├── am335x_pru_package
 │   └── pru_sw
@@ -37,4 +38,4 @@ $ tree -d
 └── lib
 
 30 directories
-
+```
