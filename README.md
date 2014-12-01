@@ -32,10 +32,20 @@ $ tree -d
 │   ├── pruss_c
 │   │   └── nbproject
 │   │       └── private
+│   ├── pruss_CAN
+│   │   └── nbproject
+│   │       └── private
+│   ├── pruss_CAN2
+│   │   ├── include
+│   │   │   ├── armv7a
+│   │   │   │   └── am335x
+│   │   │   └── hw
+│   │   └── nbproject
+│   │       └── private
 │   ├── pruss_epwm
 │   └── pruss_iep
 ├── include
 └── lib
 
-30 directories
+40 directories
 ```
