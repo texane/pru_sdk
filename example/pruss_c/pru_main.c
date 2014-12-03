@@ -10,15 +10,13 @@ int main(void)
   ocp_init();
   shm_init();
 
- volatile int i = 0; 
-  while (1) 
+// volatile int i = 0; 
+//  while (1) 
   {
     shm_write_uint32(0, 0xdeadbeef);
     shm_write_uint32(4, 0x12345678);
     shm_write_float(8, x);
-    shm_write_float(12, i++);
-
-    
+ //   shm_write_float(12, i++);
   }
 
   /* for (i = 0; i != 8; ++i) */

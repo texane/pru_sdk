@@ -78,12 +78,12 @@ int main(int ac, char** av) {
 
     signal(SIGINT, on_sigint);
     while (is_sigint == 0) {
-        printf("reading count: %d\n",count++);
+        printf("reading count: %d\n", count++);
         usleep(1000000);
         read_words(x, n);
         for (i = 0; i != n; ++i) {
             //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
-      printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
+            printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
         }
         printf("\n");
     }

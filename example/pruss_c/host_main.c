@@ -69,16 +69,32 @@ int main(int ac, char** av)
     printf("prussdrv_open open failed\n");
     return -1;
   }
-
-  prussdrv_pruintc_init(&pruss_intc_initdata);
+ if (prussdrv_pruintc_init(&pruss_intc_initdata))
+  {
+    printf("prussdrv_pruintc_init failed\n");
+    return -1;
+  }
+  else
+  {
+    printf("prussdrv_pruintc_init success\n");
+  }
 
   /* zero_words(n); */
 
-#define PRU_NUM 0
+#define PRU_NUM 1
 
   /* write data from data.bin */
-  prussdrv_load_datafile(PRU_NUM, "./data.bin");
+  //prussdrv_load_datafile(PRU_NUM, "./data.bin");
 
+  if (prussdrv_load_datafile(PRU_NUM, "./data.bin"))
+  {
+    printf("prussdrv_load_datafile failed\n");
+  //  return -1;
+  }
+  else
+  {
+    printf("prussdrv_load_datafile success\n");
+  }
   /* execute code on pru0 */
   prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
  // prussdrv_exec_program(PRU_NUM, "./text.bin");

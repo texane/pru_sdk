@@ -113,7 +113,15 @@ can_frame entry;
  **                      INTERNAL FUNCTION DEFINITIONS
  ******************************************************************************/
 int main(void) {
-    unsigned int index = 0;
+    unsigned int index = 0, i = 0;
+    ocp_init();
+    shm_init();
+
+
+    shm_write_uint32(0, 0xdeadbeef);
+    shm_write_uint32(4, 0xAABBCCDD);
+    shm_write_uint32(8, i++);
+    HWREG(0x00012004) = 0;
 
     /* Enable the DCAN0 module clock */
     //  DCANModuleClkConfig();
@@ -175,13 +183,11 @@ int main(void) {
     /* Enable the interrupt line 0 of DCAN module */
     //  DCANIntLineEnable(SOC_DCAN_0_REGS, DCAN_INT_LINE0);
 
-    ocp_init();
-    shm_init();
+
     /* Terminating while loop */
-    int i = 0;
     while (1) {
-      //  shm_write_uint32(0, 0xdeadbeef);
-      //  shm_write_uint32(4, 0x12345678);
+        //  shm_write_uint32(0, 0xdeadbeef);
+        //  shm_write_uint32(4, 0x12345678);
         shm_write_uint32(8, i++);
         // shm_write_float(8, i++);
     }
