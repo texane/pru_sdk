@@ -1,0 +1,34 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* identification */
+	part-number = "pwm_p9_22";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			pwm_p9_22: pinmux_pwm_p9_22_pins {
+				pinctrl-single,pins = <0x150 0x3>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			pwm_test_p9_22 {
+				compatible	= "pwm_test";
+				pwm-names 	= "PWM_p9_22";
+				pinctrl-names	= "default";
+				pinctrl-0	= <&pwm_p9_22>;
+				enabled		= <1>;
+				status 		= "okay";
+			};
+		};
+	};
+
+};

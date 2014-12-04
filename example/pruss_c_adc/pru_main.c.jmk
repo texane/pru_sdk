@@ -1,0 +1,34 @@
+
+#include <stdint.h>
+#include "pru_hal.h"
+
+int main(void)
+{
+  volatile float A0= 0.076;
+  volatile float A1= -0.046;
+  volatile float A2= 0.0;
+  volatile int adc_val;  
+   
+  ocp_init();
+  shm_init();
+ 
+
+  adc_val= adc_read(0, 0, 0);
+  /* i = 0; */
+  /* while (1) */
+  {
+    shm_write_float(0, A0);
+    shm_write_float(4, A1);
+    shm_write_float(8, A2);
+    shm_write_uint32(12, adc_val);
+  }
+
+  /* for (i = 0; i != 8; ++i) */
+  /* { */
+  /*   shm_write(i * 4, i); */
+  /* } */
+
+  __halt();
+
+  return 0;
+}
