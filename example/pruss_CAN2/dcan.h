@@ -44,7 +44,7 @@
 #ifndef __DCAN_H__
 #define __DCAN_H__
 
-#include "hw_dcan.h"
+#include "../../include/include/hw/hw_dcan.h"
 
 #ifdef __cplusplus
 extern "C" {

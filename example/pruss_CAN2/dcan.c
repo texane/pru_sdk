@@ -41,7 +41,9 @@
 *
 */
 
-#include "hw_types.h"
+#include "../../include/include/hw/hw_types.h"
+#include "../../include/include/hw/soc_AM335x.h"
+#include "../../include/include/hw/hw_cm_per.h"
 #include "dcan.h"
 
 /*******************************************************************************
@@ -1690,6 +1692,89 @@ void DCANTransmitRequestControl(unsigned int baseAdd, unsigned int txRqst,
 
     /* Set the TxRqst bit with the user sent value */
     HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (txRqst & DCAN_IFMCTL_TXRQST);
+}
+
+
+/**
+ * \brief   This function will enable the module clocks for DCAN.
+ *
+ * \return  None.
+ *
+ */
+void DCANModuleClkConfig(void)
+{
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) =
+                             CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+     CM_PER_L3S_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) =
+                             CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+     CM_PER_L3_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) =
+                             CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
+                               CM_PER_L3_INSTR_CLKCTRL_MODULEMODE) !=
+                                   CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) =
+                             CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
+        CM_PER_L3_CLKCTRL_MODULEMODE) != CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) =
+                             CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+                              CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL) !=
+                                CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) =
+                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL) !=
+                               CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) =
+                             CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) &
+      CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) = 
+                                  CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) & 
+                         CM_PER_DCAN1_CLKCTRL_MODULEMODE) != 
+                         CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) = 
+                                  CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) & 
+                         CM_PER_DCAN0_CLKCTRL_MODULEMODE) != 
+                         CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE);
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+            CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+           (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
+            CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK))); 
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
+            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK)));
 }
 
 /****************************** END OF FILE ***********************************/

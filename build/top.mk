@@ -40,3 +40,4 @@ clean	:
 	-rm -f $(BIN_FILES)
 	-rm -f $(DTBO_FILES)
 	-rm -f main
+	

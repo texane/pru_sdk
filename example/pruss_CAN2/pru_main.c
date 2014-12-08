@@ -35,49 +35,16 @@
  *
  */
 
-/*
- * Copyright (C) 2010 Texas Instruments Incorporated - http://www.ti.com/ 
- */
-/* 
- *  Redistribution and use in source and binary forms, with or without 
- *  modification, are permitted provided that the following conditions 
- *  are met:
- *
- *    Redistributions of source code must retain the above copyright 
- *    notice, this list of conditions and the following disclaimer.
- *
- *    Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the   
- *    distribution.
- *
- *    Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
 
 /* Include the necessary header files */
 //#include "consoleUtils.h"
-#include "dcan_frame.h"
-#include "soc_AM335x.h"
-#include "evmAM335x.h"
-#include "hw_types.h"
+#include "../../include/include/hw/soc_AM335x.h"
+#include "../../include/include/armv7a/am335x/evmAM335x.h"
+#include "../../include/include/pruss.h"
+#include "../../include/include/hw/hw_types.h"
 #include "dcan.h"
-#include "pruss.h"
 #include "pru_hal.h"
+#include "dcan_frame.h"
 
 /******************************************************************************
  **                       INTERNAL MACRO DEFINITIONS
@@ -88,6 +55,8 @@
 #define DCAN_BIT_RATE                     (1000000u)
 #define CAN_TX_MSG_EXTD_ID                (0x1000u)
 #define CAN_TX_MSG_STD_ID                 (0x02u)
+
+#define REG_Len                 (4)
 
 /******************************************************************************
  **                       INTERNAL FUNCTION PROTOTYPES                     
@@ -107,7 +76,8 @@ static volatile unsigned int isrFlag = 1;
 static unsigned int canData[2];
 static unsigned int canId = 0;
 static unsigned int bytes = 0;
-can_frame entry;
+can_frame entryRx;
+can_frame entryTx;
 
 /******************************************************************************
  **                      INTERNAL FUNCTION DEFINITIONS
@@ -120,11 +90,17 @@ int main(void) {
 
     shm_write_uint32(0, 0xdeadbeef);
     shm_write_uint32(4, 0xAABBCCDD);
-    shm_write_uint32(8, i++);
+    shm_write_uint32(8, 0xAABBCCDD);
+    shm_write_uint32(12, 0xAABBCCDD);
+    shm_write_uint32(16, 0xAABBCCDD);
+    shm_write_uint32(20, 0xAABBCCDD);
+    shm_write_uint32(24, 0xAABBCCDD);
+    shm_write_uint32(28, 0xAABBCCDD);
+
     HWREG(0x00012004) = 0;
 
     /* Enable the DCAN0 module clock */
-    //  DCANModuleClkConfig();
+    DCANModuleClkConfig();
 
     /* Perform the pinmux for DCAN0 */
     //   DCANPinMuxSetUp(1);
@@ -155,24 +131,26 @@ int main(void) {
         /* Invalidate all message objects in the message RAM */
         CANInValidateMsgObject(SOC_DCAN_0_REGS, index, DCAN_IF2_REG);
     }
-
-    entry.flag = rxflag;
-    entry.id = canId;
-
+    unsigned int data[2] = {0x1122, 0x3344};
+    entryRx.flag = rxflag;
+    entryRx.id = canId;
+    entryRx.data = data;
+    shm_write_uint32(12, *(entryRx.data));
     /* 
      ** Configure a receive message object to accept CAN 
      ** frames with standard ID.
      */
-    CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);
+    CANMsgObjectConfig(SOC_DCAN_0_REGS, &entryRx);
 
-    entry.flag = (CAN_EXT_FRAME | CAN_MSG_DIR_RX | CAN_DATA_FRAME);
-    entry.id = canId;
+    entryTx.flag = (CAN_EXT_FRAME | CAN_MSG_DIR_TX | CAN_DATA_FRAME);
+    entryTx.id = canId;
+    entryTx.data = data;
 
     /*
-     ** Configure a receive message object to accept CAN
+     ** Configure a transmit message object to transmit CAN
      ** frames with extended ID.
      */
-    CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);
+    CANMsgObjectConfig(SOC_DCAN_0_REGS, &entryTx);
 
     /* Start the CAN transfer */
     DCANNormalModeSet(SOC_DCAN_0_REGS);
@@ -184,12 +162,15 @@ int main(void) {
     //  DCANIntLineEnable(SOC_DCAN_0_REGS, DCAN_INT_LINE0);
 
 
-    /* Terminating while loop */
+    /* Core loop */
     while (1) {
-        //  shm_write_uint32(0, 0xdeadbeef);
-        //  shm_write_uint32(4, 0x12345678);
-        shm_write_uint32(8, i++);
-        // shm_write_float(8, i++);
+        shm_write_uint32(REG_Len * 0, i++);
+        shm_write_uint32(REG_Len * 1, HWREG(SOC_DCAN_0_REGS + DCAN_ES));
+        shm_write_uint32(REG_Len * 2, HWREG(SOC_DCAN_0_REGS + DCAN_BTR));
+        shm_write_uint32(REG_Len * 3, HWREG(SOC_DCAN_0_REGS + DCAN_INT_LINE0_STAT));
+
+        DCANParityIsr();
+        DCANIsr0();
     }
 }
 
@@ -205,6 +186,10 @@ static void ConfigureDCAN(void) {
 
     /* Enable the write access to the DCAN configuration registers */
     DCANConfigRegWriteAccessControl(SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_ENABLE);
+
+    DCANTestModeControl(SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
+
+    DCANTestModesEnable(SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
 
     /* Configure the bit timing values for CAN communication */
     CANSetBitTiming(SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
@@ -282,6 +267,7 @@ static void DCANIsr0(void) {
                 DCAN_ERROR_OCCURED))) {
             /* Get the number of the message object which caused the interrupt */
             msgNum = DCANIntRegStatusGet(SOC_DCAN_0_REGS, DCAN_INT_LINE0_STAT);
+            shm_write_uint32(REG_Len * 4, msgNum);
 
             /* Interrupt handling for transmit objects */
             if (msgNum < (CAN_NUM_OF_MSG_OBJS / 2)) {
@@ -296,11 +282,11 @@ static void DCANIsr0(void) {
 
                 if ((DCANIFArbStatusGet(SOC_DCAN_0_REGS, DCAN_IF2_REG) &
                         DCAN_EXT_ID_READ) == DCAN_29_BIT_ID) {
-                    entry.flag = (CAN_EXT_FRAME | CAN_DATA_FRAME | CAN_MSG_DIR_TX);
-                    entry.id = CAN_TX_MSG_EXTD_ID;
+                    entryRx.flag = (CAN_EXT_FRAME | CAN_DATA_FRAME | CAN_MSG_DIR_TX);
+                    entryRx.id = CAN_TX_MSG_EXTD_ID;
                 } else {
-                    entry.flag = (CAN_DATA_FRAME | CAN_MSG_DIR_TX);
-                    entry.id = CAN_TX_MSG_STD_ID;
+                    entryRx.flag = (CAN_DATA_FRAME | CAN_MSG_DIR_TX);
+                    entryRx.id = CAN_TX_MSG_STD_ID;
                 }
 
                 /* Clear the Interrupt pending status */
@@ -316,6 +302,7 @@ static void DCANIsr0(void) {
                 /* Print the received data bytes on the UART console */
                 for (index = 0; index < bytes; index++) {
                     // ConsoleUtilsPrintf("%c", *dataPtr++);
+                    shm_write_uint32(REG_Len * (5 + index), *dataPtr++);
                 }
 
                 //     ConsoleUtilsPrintf("\r\n");
@@ -323,11 +310,11 @@ static void DCANIsr0(void) {
                 isrFlag = 0;
 
                 /* Populate the can_frame structure with the CAN frame information */
-                entry.dlc = bytes;
-                entry.data = (unsigned int*) canData;
+                entryRx.dlc = bytes;
+                entryRx.data = (unsigned int*) canData;
 
                 /* Configure a transmit message object */
-                CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);
+                //CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);
             }
         }
     }
@@ -357,62 +344,6 @@ static void DCANAintcConfigure(void) {
     /* Enable the system interrupts in AINTC */
     //   IntSystemEnable(SYS_INT_DCAN0_PARITY);
 
-    /*
-        __asm__ __volatile__(
-
-                // #define jumpOffset        r8
-                // #define regPointer        r11
-                // #define regOffset         r12
-                // #define regVal            r17
-                // #define eventStatus       r31
-
-
-                // Initialize pointer to INTC registers
-                " MOV32     regOffset, 0x00000000"
-                // Clear SYS_EVT
-                " MOV32     r31, 0x00000000"
-
-                // Global enable of all host interrupts
-                "  LDI       regVal.w0, 0x0001"
-                "  SBCO      regVal, CONST_PRUSSINTC, GER_OFFSET, 2"
-
-                // Enable host interrupt 0
-                "  MOV32     regVal, (0x00000000 | HOST_NUM)"
-                "  SBCO      regVal, CONST_PRUSSINTC, HIESR_OFFSET, 4"
-
-                // Map channel 0 to host 0
-                "  LDI       regOffset.w0, INTC_HOSTMAP_REGS_OFFSET"
-                "  ADD       regOffset.w0, regOffset.w0, HOST_NUM"
-                "  LDI       regVal.w0, CHN_NUM"
-                "  SBCO      regVal, CONST_PRUSSINTC, regOffset.w0, 1"
-
-                // Map Timer 0 interrupt to channel 0
-                "  LDI       regOffset.w0, INTC_CHNMAP_REGS_OFFSET"
-                "  ADD       regOffset, regOffset, SYS_EVT"
-                "  LDI       regVal.b0, CHN_NUM"
-                "  SBCO      regVal.b0, CONST_PRUSSINTC, regOffset.w0, 1"
-
-                // Set the polarity registers
-                "  MOV32     regPointer, (INTC_REGS_BASE + INTC_SYS_INT_REGS_OFFSET)"
-                "  MOV32     regVal, 0xFFFFFFFF"
-                "  SBBO      regVal, regPointer, 0x00, 4"
-                "  SBBO      regVal, regPointer, 0x04, 4"
-
-                // Set the type registers
-                "  MOV32     regVal, 0x1C000000"
-                "  SBBO      regVal, regPointer, 0x80, 4"
-                "  LDI       regVal.w2, #0x0000"
-                "  SBBO      regVal, regPointer, 0x84, 4"
-
-                // Make sure the Timer 0 system interrupt is cleared
-                "  MOV32     regVal, (0x00000000 | SYS_EVT)"
-                "  SBCO      regVal, CONST_PRUSSINTC, SICR_OFFSET, 4"
-
-                // Enable Timer 0 system interrupt
-                "  SBCO      regVal, CONST_PRUSSINTC, EISR_OFFSET, 4"
-
-                )
-     */
 
     // map host 0-7 to channel 0-7
     // HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_HMR1_REG) = 0x03020100;

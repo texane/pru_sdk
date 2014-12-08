@@ -83,7 +83,7 @@ int main(int ac, char** av) {
         read_words(x, n);
         for (i = 0; i != n; ++i) {
             //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
-            printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
+            printf("mem %d: (%08x)\n", i, *(x + i));
         }
         printf("\n");
     }

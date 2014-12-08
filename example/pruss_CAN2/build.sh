@@ -2,6 +2,17 @@
 
 export PRU_SDK_DIR=`pwd`/../..
 export PRU_CGT_DIR=/opt/PRU/ti-cgt-pru_2.1.0
+export START_WARE_headers_1=$PRU_SDK_DIR/include
+export START_WARE_headers_2=$PRU_SDK_DIR/include/include/hw
+export START_WARE_headers_3=$PRU_SDK_DIR/include/include/armv7a
+export START_WARE_headers_4=$PRU_SDK_DIR/include/include/armv7a/am335x
+
+export Headers="-i$PRU_CGT_DIR/include \
+-i$PRU_CGT_DIR/lib \
+-i$START_WARE_headers_1 \
+-i$START_WARE_headers_2 \
+-i$START_WARE_headers_3 \
+-i$START_WARE_headers_4 "
 
 
 # compile support library without optimization
@@ -11,24 +22,21 @@ export PRU_CGT_DIR=/opt/PRU/ti-cgt-pru_2.1.0
 $PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i$PRU_CGT_DIR/include \
--i$PRU_CGT_DIR/lib \
+$Headers \
 -c \
 dcan.c
 
 $PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i$PRU_CGT_DIR/include \
--i$PRU_CGT_DIR/lib \
+$Headers \
 -c \
 dcan_frame.c
 
 $PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i$PRU_CGT_DIR/include \
--i$PRU_CGT_DIR/lib \
+$Headers \
 -c \
 pru_hal.c
 
@@ -36,8 +44,7 @@ pru_hal.c
 $PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i$PRU_CGT_DIR/include \
--i$PRU_CGT_DIR/lib \
+$Headers \
 -O3 \
 -c \
 pru_main.c
@@ -49,8 +56,7 @@ pru_main.c
 $PRU_CGT_DIR/bin/clpru \
 --silicon_version=2 \
 --hardware_mac=on \
--i$PRU_CGT_DIR/include \
--i$PRU_CGT_DIR/lib \
+$Headers \
 -z \
 pru_main.obj dcan.obj dcan_frame.obj pru_hal.obj -llibc.a \
 -m pru_main.map \
