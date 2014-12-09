@@ -44,6 +44,7 @@
 #include "../../include/include/hw/hw_types.h"
 #include "../../include/include/hw/soc_AM335x.h"
 #include "../../include/include/hw/hw_cm_per.h"
+#include "../../include/include/hw/hw_control_AM335x.h"
 #include "dcan.h"
 
 /*******************************************************************************
