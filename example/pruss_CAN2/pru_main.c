@@ -108,7 +108,7 @@ main (void)
   //   DCANPinMuxSetUp(1);
 
   /* Initialize the DCAN message RAM */
-  //  DCANMsgRAMInit(1);
+  DCANMsgRAMInit (1);
 
   /* Initialize the UART console */
   // ConsoleUtilsInit();
@@ -134,20 +134,21 @@ main (void)
       /* Invalidate all message objects in the message RAM */
       CANInValidateMsgObject (SOC_DCAN_0_REGS, index, DCAN_IF2_REG);
     }
-  unsigned int data[2] = {0x1122, 0x3344};
+  unsigned int data_1[2] = {0x1100, 0x1111};
   entryRx.flag = rxflag;
   entryRx.id = canId;
-  entryRx.data = data;
+  entryRx.data = data_1;
   shm_write_uint32 (12, *(entryRx.data));
   /* 
    ** Configure a receive message object to accept CAN 
    ** frames with standard ID.
    */
   CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryRx);
-
+  
+  unsigned int data_2[2] = {0x1100, 0x2222};
   entryTx.flag = (CAN_EXT_FRAME | CAN_MSG_DIR_TX | CAN_DATA_FRAME);
   entryTx.id = canId;
-  entryTx.data = data;
+  entryTx.data = data_2;
 
   /*
    ** Configure a transmit message object to transmit CAN
