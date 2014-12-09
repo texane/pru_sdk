@@ -88,7 +88,7 @@ int main(void) {
     shm_init();
 
 
-    shm_write_uint32(0, 0xdeadbeef);
+    shm_write_uint32(0, 0xdeadbeef); //initiate the shared memory
     shm_write_uint32(4, 0xAABBCCDD);
     shm_write_uint32(8, 0xAABBCCDD);
     shm_write_uint32(12, 0xAABBCCDD);
@@ -97,7 +97,7 @@ int main(void) {
     shm_write_uint32(24, 0xAABBCCDD);
     shm_write_uint32(28, 0xAABBCCDD);
 
-    HWREG(0x00012004) = 0;
+   // HWREG(0x00012004) = 0;
 
     /* Enable the DCAN0 module clock */
     DCANModuleClkConfig();
@@ -256,7 +256,7 @@ static void DCANIsr0(void) {
             }
 
             if (errVal & DCAN_ERR_WARN_STATE_RCHD) {
-                //     ConsoleUtilsPrintf("Atleast one of the error counters have");
+                //     ConsoleUtilsPrintf("At least one of the error counters have");
                 //     ConsoleUtilsPrintf(" reached the error warning limit\n");
             }
         }
