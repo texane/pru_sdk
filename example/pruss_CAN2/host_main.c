@@ -97,7 +97,7 @@ main (int ac, char** av)
       for (i = 0; i != n; ++i)
         {
           //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
-          printf ("mem %d: (%08x)\n", i, *(x + i));
+          printf ("mem %d %08x: (%08x)\n", i, (x + i), *(unsigned long*) (x + i));
         }
       printf ("\n");
     }
