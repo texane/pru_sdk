@@ -57,6 +57,7 @@
 #define CAN_TX_MSG_STD_ID                 (0x02u)
 
 #define REG_Len                 (4)
+#define MEM_SIZE                (16)
 
 /******************************************************************************
  **                       INTERNAL FUNCTION PROTOTYPES                     
@@ -89,15 +90,10 @@ main (void)
   ocp_init ();
   shm_init ();
 
-
-  shm_write_uint32 (0, 0xdeadbeef); //initiate the shared memory
-  shm_write_uint32 (4, 0xAABBCCDD);
-  shm_write_uint32 (8, 0xAABBCCDD);
-  shm_write_uint32 (12, 0xAABBCCDD);
-  shm_write_uint32 (16, 0xAABBCCDD);
-  shm_write_uint32 (20, 0xAABBCCDD);
-  shm_write_uint32 (24, 0xAABBCCDD);
-  shm_write_uint32 (28, 0xAABBCCDD);
+  for (i = 0; i < MEM_SIZE; i++)
+    {
+      shm_write_uint32 (REG_Len*i, 0xdeadbeef); //initiate the shared memory
+    }
 
   // HWREG(0x00012004) = 0;
 
@@ -144,7 +140,7 @@ main (void)
    ** frames with standard ID.
    */
   CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryRx);
-  
+
   unsigned int data_2[2] = {0x1100, 0x2222};
   entryTx.flag = (CAN_EXT_FRAME | CAN_MSG_DIR_TX | CAN_DATA_FRAME);
   entryTx.id = canId;
@@ -167,6 +163,7 @@ main (void)
 
 
   /* Core loop */
+  i = 0;
   while (1)
     {
       shm_write_uint32 (REG_Len * 0, i++);
