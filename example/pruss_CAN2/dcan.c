@@ -1777,4 +1777,24 @@ void DCANModuleClkConfig(void)
             CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK)));
 }
 
+/**
+ * \brief   This function initializes the DCAN message RAM.
+ *
+ * \param   instanceNum       The DCAN instance to be used.
+ *
+ * \return  None.
+ *
+ */
+void DCANMsgRAMInit(unsigned int instanceNum)
+{
+    if(1 == instanceNum)
+    {
+        HWREG(SOC_CONTROL_REGS + CONTROL_DCAN_RAMINIT) |= 
+              CONTROL_DCAN_RAMINIT_DCAN0_RAMINIT_START;
+    }
+    else
+    {
+        return;
+    }  
+}
 /****************************** END OF FILE ***********************************/

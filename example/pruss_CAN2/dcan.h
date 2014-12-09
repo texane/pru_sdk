@@ -641,6 +641,10 @@ extern void DCANUseAcceptanceMaskControl(unsigned int baseAdd, unsigned int uMas
                                   unsigned int regNum);
 extern void DCANTransmitRequestControl(unsigned int baseAdd, unsigned int txRqst,
                                 unsigned int regNum);
+
+extern void DCANModuleClkConfig(void);
+extern void DCANMsgRAMInit(unsigned int instanceNum);
+
 #ifdef __cplusplus
 }
 #endif
