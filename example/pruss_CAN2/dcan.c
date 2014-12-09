@@ -8,38 +8,38 @@
  */
 
 /*
-* Copyright (C) 2010 Texas Instruments Incorporated - http://www.ti.com/
-*/
+ * Copyright (C) 2010 Texas Instruments Incorporated - http://www.ti.com/
+ */
 /*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*    Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-*
-*    Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the
-*    distribution.
-*
-*    Neither the name of Texas Instruments Incorporated nor the names of
-*    its contributors may be used to endorse or promote products derived
-*    from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-*  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-*  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-*  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-*  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*
-*/
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *    Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *    Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ *    Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
 
 #include "../../include/include/hw/hw_types.h"
 #include "../../include/include/hw/soc_AM335x.h"
@@ -48,8 +48,8 @@
 #include "dcan.h"
 
 /*******************************************************************************
-*                       INTERNAL MACRO DEFINITIONS
-*******************************************************************************/
+ *                       INTERNAL MACRO DEFINITIONS
+ *******************************************************************************/
 #define CAN_CALC_MAX_ERROR     (50u)
 #define TX_REQUEST_X_MASK      (0x0000FFFFu)
 #define DCAN_STD_ID_SHIFT      (18u)
@@ -58,8 +58,9 @@
 #define INT_PEND_X_MASK        (0x0000FFFFu)
 
 /*******************************************************************************
-*                        API FUNCTION DEFINITIONS
-*******************************************************************************/
+ *                        API FUNCTION DEFINITIONS
+ *******************************************************************************/
+
 /**
  * \brief   This API will enable the DCAN peripheral in Initialization mode. 
  *
@@ -71,13 +72,14 @@
  *          CAN module enters initialization mode.
  *
  **/
-void DCANInitModeSet(unsigned int baseAdd)
+void
+DCANInitModeSet (unsigned int baseAdd)
 {
-    /* Set the Init field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) |= DCAN_CTL_INIT;
+  /* Set the Init field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) |= DCAN_CTL_INIT;
 
-    /* Wait for Init bit to set */ 
-    while(!(HWREG(baseAdd + DCAN_CTL) & DCAN_CTL_INIT));
+  /* Wait for Init bit to set */
+  while (!(HWREG (baseAdd + DCAN_CTL) & DCAN_CTL_INIT));
 }
 
 /**
@@ -92,13 +94,14 @@ void DCANInitModeSet(unsigned int baseAdd)
  *          and communication on CAN bus is started. 
  *
  **/
-void DCANNormalModeSet(unsigned int baseAdd)
+void
+DCANNormalModeSet (unsigned int baseAdd)
 {
-    /* Clear the CCE and Init bit */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_INIT;
+  /* Clear the CCE and Init bit */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_INIT;
 
-    /* Wait for Init bit to clear */
-    while(HWREG(baseAdd + DCAN_CTL) & DCAN_CTL_INIT);
+  /* Wait for Init bit to clear */
+  while (HWREG (baseAdd + DCAN_CTL) & DCAN_CTL_INIT);
 }
 
 /**
@@ -117,10 +120,11 @@ void DCANNormalModeSet(unsigned int baseAdd)
  *         the DCAN at a bit rate of 1MBits/s.
  *
  **/
-void DCANBitTimingConfig(unsigned int baseAdd, unsigned int btrValue)
+void
+DCANBitTimingConfig (unsigned int baseAdd, unsigned int btrValue)
 {
-    /* Write the value to DCAN_BTR register */
-    HWREG(baseAdd + DCAN_BTR) = btrValue;
+  /* Write the value to DCAN_BTR register */
+  HWREG (baseAdd + DCAN_BTR) = btrValue;
 }
 
 /**
@@ -134,13 +138,14 @@ void DCANBitTimingConfig(unsigned int baseAdd, unsigned int btrValue)
  *          initialization mode. 
  *
  **/
-void DCANReset(unsigned int baseAdd)
+void
+DCANReset (unsigned int baseAdd)
 {
-    /* Set the SWR bit of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) |= DCAN_CTL_SWR;
+  /* Set the SWR bit of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) |= DCAN_CTL_SWR;
 
-    /* Poll in the loop until reset completes */
-    while((HWREG(baseAdd + DCAN_CTL) & DCAN_CTL_SWR));
+  /* Poll in the loop until reset completes */
+  while ((HWREG (baseAdd + DCAN_CTL) & DCAN_CTL_SWR));
 }
 
 /**
@@ -156,10 +161,11 @@ void DCANReset(unsigned int baseAdd)
  * \return  None.
  *
  **/
-void DCANIntEnable(unsigned int baseAdd, unsigned int intFlags)
+void
+DCANIntEnable (unsigned int baseAdd, unsigned int intFlags)
 {
-    /* Enable the DCAN interrupts */
-    HWREG(baseAdd + DCAN_CTL) |= (intFlags & (DCAN_CTL_SIE | DCAN_CTL_EIE));
+  /* Enable the DCAN interrupts */
+  HWREG (baseAdd + DCAN_CTL) |= (intFlags & (DCAN_CTL_SIE | DCAN_CTL_EIE));
 }
 
 /**
@@ -175,10 +181,11 @@ void DCANIntEnable(unsigned int baseAdd, unsigned int intFlags)
  * \return  None.
  *
  **/
-void DCANIntDisable(unsigned int baseAdd, unsigned int intFlags)
+void
+DCANIntDisable (unsigned int baseAdd, unsigned int intFlags)
 {
-    /* Disable the DCAN interrupts */
-    HWREG(baseAdd + DCAN_CTL) &= ~(intFlags & (DCAN_CTL_SIE | DCAN_CTL_EIE));
+  /* Disable the DCAN interrupts */
+  HWREG (baseAdd + DCAN_CTL) &= ~(intFlags & (DCAN_CTL_SIE | DCAN_CTL_EIE));
 }
 
 /**
@@ -195,13 +202,14 @@ void DCANIntDisable(unsigned int baseAdd, unsigned int intFlags)
  * \return  None.
  *
  **/
-void DCANAutoReTransmitControl(unsigned int baseAdd, unsigned int autoReTxn)
+void
+DCANAutoReTransmitControl (unsigned int baseAdd, unsigned int autoReTxn)
 {
-    /* Clear the DAR field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_DAR;
+  /* Clear the DAR field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_DAR;
 
-    /* Set the user sent value to DAR field */
-    HWREG(baseAdd + DCAN_CTL) |= (autoReTxn & DCAN_CTL_DAR);
+  /* Set the user sent value to DAR field */
+  HWREG (baseAdd + DCAN_CTL) |= (autoReTxn & DCAN_CTL_DAR);
 }
 
 /**
@@ -223,14 +231,15 @@ void DCANAutoReTransmitControl(unsigned int baseAdd, unsigned int autoReTxn)
  *          so.
  *
  **/
-void DCANConfigRegWriteAccessControl(unsigned int baseAdd, 
-                                     unsigned int regConfig)
+void
+DCANConfigRegWriteAccessControl (unsigned int baseAdd,
+                                 unsigned int regConfig)
 {
-    /* Clear the CCE field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_CCE;
+  /* Clear the CCE field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_CCE;
 
-    /* Set the CCE field with the user sent value */
-    HWREG(baseAdd + DCAN_CTL) |= (regConfig & DCAN_CTL_CCE);
+  /* Set the CCE field with the user sent value */
+  HWREG (baseAdd + DCAN_CTL) |= (regConfig & DCAN_CTL_CCE);
 }
 
 /**
@@ -247,13 +256,14 @@ void DCANConfigRegWriteAccessControl(unsigned int baseAdd,
  * \return  None.
  *
  **/
-void DCANTestModeControl(unsigned int baseAdd, unsigned int testMode)
+void
+DCANTestModeControl (unsigned int baseAdd, unsigned int testMode)
 {
-    /* Clear the Test field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_TEST;    
+  /* Clear the Test field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_TEST;
 
-    /* Set the Test field with the user sent value */
-    HWREG(baseAdd + DCAN_CTL) |= (testMode & DCAN_CTL_TEST);
+  /* Set the Test field with the user sent value */
+  HWREG (baseAdd + DCAN_CTL) |= (testMode & DCAN_CTL_TEST);
 }
 
 /**
@@ -271,13 +281,14 @@ void DCANTestModeControl(unsigned int baseAdd, unsigned int testMode)
  * \return  None.
  *
  **/
-void DCANAutoBusOnControl(unsigned int baseAdd, unsigned int busControl)
+void
+DCANAutoBusOnControl (unsigned int baseAdd, unsigned int busControl)
 {
-    /* Clear the ABO field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_ABO;
+  /* Clear the ABO field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_ABO;
 
-    /* Set the ABO field with the user sent value */
-    HWREG(baseAdd + DCAN_CTL) |= (busControl & DCAN_CTL_ABO);
+  /* Set the ABO field with the user sent value */
+  HWREG (baseAdd + DCAN_CTL) |= (busControl & DCAN_CTL_ABO);
 }
 
 /**
@@ -294,13 +305,14 @@ void DCANAutoBusOnControl(unsigned int baseAdd, unsigned int busControl)
  * \return  None.
  *
  **/
-void DCANParityControl(unsigned int baseAdd, unsigned int paritySet)
+void
+DCANParityControl (unsigned int baseAdd, unsigned int paritySet)
 {
-    /* Clear the PMD field of DCAN_CTL register */
-    HWREG(baseAdd + DCAN_CTL) &= ~DCAN_CTL_PMD;
+  /* Clear the PMD field of DCAN_CTL register */
+  HWREG (baseAdd + DCAN_CTL) &= ~DCAN_CTL_PMD;
 
-    /* Set the PMD field with the user sent value */
-    HWREG(baseAdd + DCAN_CTL) |= (paritySet & DCAN_CTL_PMD);
+  /* Set the PMD field with the user sent value */
+  HWREG (baseAdd + DCAN_CTL) |= (paritySet & DCAN_CTL_PMD);
 }
 
 /**
@@ -321,10 +333,11 @@ void DCANParityControl(unsigned int baseAdd, unsigned int paritySet)
  *          status change interrupts have to be serviced.
  *
  **/
-void DCANIntLineEnable(unsigned int baseAdd, unsigned int enableLine)
+void
+DCANIntLineEnable (unsigned int baseAdd, unsigned int enableLine)
 {
-    /* Enable the interrupt lines */
-    HWREG(baseAdd + DCAN_CTL) |= (enableLine & (DCAN_CTL_IE1 | DCAN_CTL_IE0));
+  /* Enable the interrupt lines */
+  HWREG (baseAdd + DCAN_CTL) |= (enableLine & (DCAN_CTL_IE1 | DCAN_CTL_IE0));
 }
 
 /**
@@ -340,10 +353,11 @@ void DCANIntLineEnable(unsigned int baseAdd, unsigned int enableLine)
  * \return  None.
  *
  **/
-void DCANIntLineDisable(unsigned int baseAdd, unsigned int disableLine)
+void
+DCANIntLineDisable (unsigned int baseAdd, unsigned int disableLine)
 {
-    /* Disable the interrupt lines */
-    HWREG(baseAdd + DCAN_CTL) &= ~(disableLine & (DCAN_CTL_IE1 | DCAN_CTL_IE0));
+  /* Disable the interrupt lines */
+  HWREG (baseAdd + DCAN_CTL) &= ~(disableLine & (DCAN_CTL_IE1 | DCAN_CTL_IE0));
 }
 
 /**
@@ -361,11 +375,12 @@ void DCANIntLineDisable(unsigned int baseAdd, unsigned int disableLine)
  * \return  None.
  *
  **/
-void DCANDmaRequestLineEnable(unsigned int baseAdd, unsigned int ifRegFlags)
+void
+DCANDmaRequestLineEnable (unsigned int baseAdd, unsigned int ifRegFlags)
 {
-    /* Enable the DMA request lines */
-    HWREG(baseAdd + DCAN_CTL) |= (ifRegFlags & 
-                                 (DCAN_CTL_DE1 | DCAN_CTL_DE2 | DCAN_CTL_DE3)); 
+  /* Enable the DMA request lines */
+  HWREG (baseAdd + DCAN_CTL) |= (ifRegFlags &
+                                 (DCAN_CTL_DE1 | DCAN_CTL_DE2 | DCAN_CTL_DE3));
 }
 
 /**
@@ -383,10 +398,11 @@ void DCANDmaRequestLineEnable(unsigned int baseAdd, unsigned int ifRegFlags)
  * \return  None.
  *
  **/
-void DCANDmaRequestLineDisable(unsigned int baseAdd, unsigned int ifRegFlags)
+void
+DCANDmaRequestLineDisable (unsigned int baseAdd, unsigned int ifRegFlags)
 {
-    /* Disable the DMA request lines */
-    HWREG(baseAdd + DCAN_CTL) &= ~(ifRegFlags & 
+  /* Disable the DMA request lines */
+  HWREG (baseAdd + DCAN_CTL) &= ~(ifRegFlags &
                                   (DCAN_CTL_DE1 | DCAN_CTL_DE2 | DCAN_CTL_DE3));
 }
 
@@ -403,10 +419,11 @@ void DCANDmaRequestLineDisable(unsigned int baseAdd, unsigned int ifRegFlags)
  * \return  Returns the status of DCAN_INT register.
  *
  **/
-unsigned int DCANIntRegStatusGet(unsigned int baseAdd, unsigned int intLnFlag)
+unsigned int
+DCANIntRegStatusGet (unsigned int baseAdd, unsigned int intLnFlag)
 {
-    /* Return the status of DCAN_INT register */
-    return(HWREG(baseAdd + DCAN_INT) & intLnFlag);
+  /* Return the status of DCAN_INT register */
+  return (HWREG (baseAdd + DCAN_INT) & intLnFlag);
 }
 
 /**
@@ -445,10 +462,11 @@ unsigned int DCANIntRegStatusGet(unsigned int baseAdd, unsigned int intLnFlag)
  *          register is disabled when in debug/suspend mode.
  *
  **/
-unsigned int DCANErrAndStatusRegInfoGet(unsigned int baseAdd)
+unsigned int
+DCANErrAndStatusRegInfoGet (unsigned int baseAdd)
 {
-    /* Return the status of DCAN_ES register to the caller */
-    return(HWREG(baseAdd + DCAN_ES));
+  /* Return the status of DCAN_ES register to the caller */
+  return (HWREG (baseAdd + DCAN_ES));
 }
 
 /**
@@ -465,11 +483,12 @@ unsigned int DCANErrAndStatusRegInfoGet(unsigned int baseAdd)
  * \return  This API returns the status of DCAN_ERRC register.
  *
  **/
-unsigned int DCANErrCntrRegStatusGet(unsigned int baseAdd, 
-                                     unsigned int cntrFlags)
+unsigned int
+DCANErrCntrRegStatusGet (unsigned int baseAdd,
+                         unsigned int cntrFlags)
 {
-    /* Return the status of DCAN_ERRC register to the caller */
-    return(HWREG(baseAdd + DCAN_ERRC) & cntrFlags);
+  /* Return the status of DCAN_ERRC register to the caller */
+  return (HWREG (baseAdd + DCAN_ERRC) & cntrFlags);
 }
 
 /**
@@ -493,11 +512,12 @@ unsigned int DCANErrCntrRegStatusGet(unsigned int baseAdd,
  *          enabled then external loopback will be ignored. 
  *
  **/
-void DCANTestModesEnable(unsigned int baseAdd, unsigned int tstMode)
+void
+DCANTestModesEnable (unsigned int baseAdd, unsigned int tstMode)
 {
-    /* Set test mode fields of DCAN_TEST register with the user sent value */
-    HWREG(baseAdd + DCAN_TEST) |= (tstMode & 
-                                  (DCAN_TEST_RDA | DCAN_TEST_EXL | 
+  /* Set test mode fields of DCAN_TEST register with the user sent value */
+  HWREG (baseAdd + DCAN_TEST) |= (tstMode &
+                                  (DCAN_TEST_RDA | DCAN_TEST_EXL |
                                    DCAN_TEST_LBACK | DCAN_TEST_SILENT));
 }
 
@@ -522,11 +542,12 @@ void DCANTestModesEnable(unsigned int baseAdd, unsigned int tstMode)
  *          'DCANTestModeControl'.
  *
  **/
-void DCANTestModesDisable(unsigned int baseAdd, unsigned int tstMode)
+void
+DCANTestModesDisable (unsigned int baseAdd, unsigned int tstMode)
 {
-    /* Clear the mode fields of DCAN_TEST register with the user sent value */
-    HWREG(baseAdd + DCAN_TEST) &= ~(tstMode &
-                                   (DCAN_TEST_RDA | DCAN_TEST_EXL | 
+  /* Clear the mode fields of DCAN_TEST register with the user sent value */
+  HWREG (baseAdd + DCAN_TEST) &= ~(tstMode &
+                                   (DCAN_TEST_RDA | DCAN_TEST_EXL |
                                     DCAN_TEST_LBACK | DCAN_TEST_SILENT));
 }
 
@@ -551,13 +572,14 @@ void DCANTestModesDisable(unsigned int baseAdd, unsigned int tstMode)
  *          message transfer.
  *
  **/
-void DCANTxPinControl(unsigned int baseAdd, unsigned int pinCtl)
+void
+DCANTxPinControl (unsigned int baseAdd, unsigned int pinCtl)
 {
-    /* Clear the TX[1:0] field of DCAN_TEST register */
-    HWREG(baseAdd + DCAN_TEST) &= ~DCAN_TEST_TX;
+  /* Clear the TX[1:0] field of DCAN_TEST register */
+  HWREG (baseAdd + DCAN_TEST) &= ~DCAN_TEST_TX;
 
-    /* Set the TX[1:0] field with the user sent value */
-    HWREG(baseAdd + DCAN_TEST) |= (pinCtl & DCAN_TEST_TX);
+  /* Set the TX[1:0] field with the user sent value */
+  HWREG (baseAdd + DCAN_TEST) |= (pinCtl & DCAN_TEST_TX);
 }
 
 /**
@@ -576,10 +598,11 @@ void DCANTxPinControl(unsigned int baseAdd, unsigned int pinCtl)
  *          'DCANTestModeControl'.
  *
  **/
-unsigned int DCANRxPinStatusGet(unsigned int baseAdd)
+unsigned int
+DCANRxPinStatusGet (unsigned int baseAdd)
 {
-    /* Return the status of CAN_RX pin to the caller */
-    return(HWREG(baseAdd + DCAN_TEST) & DCAN_TEST_RX);
+  /* Return the status of CAN_RX pin to the caller */
+  return (HWREG (baseAdd + DCAN_TEST) & DCAN_TEST_RX);
 }
 
 /**
@@ -599,11 +622,12 @@ unsigned int DCANRxPinStatusGet(unsigned int baseAdd)
  *                                    detected \n
  *
  **/
-unsigned int DCANParityErrCdRegStatusGet(unsigned int baseAdd, 
-                                         unsigned int statFlg)
+unsigned int
+DCANParityErrCdRegStatusGet (unsigned int baseAdd,
+                             unsigned int statFlg)
 {
-    /* Return the status of Parity error code register */
-    return(HWREG(baseAdd + DCAN_PERR) & statFlg); 
+  /* Return the status of Parity error code register */
+  return (HWREG (baseAdd + DCAN_PERR) & statFlg);
 }
 
 /**
@@ -622,10 +646,11 @@ unsigned int DCANParityErrCdRegStatusGet(unsigned int baseAdd,
  *          During debug/suspend mode, running Auto-bus-on timer will be paused.
  *
  **/
-void DCANAutoBusOnTimeValSet(unsigned int baseAdd, unsigned int timeVal)
+void
+DCANAutoBusOnTimeValSet (unsigned int baseAdd, unsigned int timeVal)
 {
-    /* Set the user sent value to DCAN_ABOTR register */
-    HWREG(baseAdd + DCAN_ABOTR) = timeVal;
+  /* Set the user sent value to DCAN_ABOTR register */
+  HWREG (baseAdd + DCAN_ABOTR) = timeVal;
 }
 
 /**
@@ -642,10 +667,11 @@ void DCANAutoBusOnTimeValSet(unsigned int baseAdd, unsigned int timeVal)
  *          During debug/suspend mode, running Auto-bus-on timer will be paused.
  *
  **/
-unsigned int DCANAutoBusOnTimeValGet(unsigned int baseAdd)
+unsigned int
+DCANAutoBusOnTimeValGet (unsigned int baseAdd)
 {
-    /* Return the Auto-bus-on timer value to the caller */
-    return(HWREG(baseAdd + DCAN_ABOTR));
+  /* Return the Auto-bus-on timer value to the caller */
+  return (HWREG (baseAdd + DCAN_ABOTR));
 }
 
 /**
@@ -660,10 +686,11 @@ unsigned int DCANAutoBusOnTimeValGet(unsigned int baseAdd)
  *          where 1 <= n <= 8 \n
  *
  **/
-unsigned int DCANTxRqstXStatusGet(unsigned int baseAdd)
+unsigned int
+DCANTxRqstXStatusGet (unsigned int baseAdd)
 {
-    /* Return the status from DCAN_TXRQ_X register */
-    return(HWREG(baseAdd + DCAN_TXRQ_X) & TX_REQUEST_X_MASK);
+  /* Return the status from DCAN_TXRQ_X register */
+  return (HWREG (baseAdd + DCAN_TXRQ_X) & TX_REQUEST_X_MASK);
 }
 
 /**
@@ -681,16 +708,17 @@ unsigned int DCANTxRqstXStatusGet(unsigned int baseAdd)
  *          1 <= msgNum <= 128.
  *
  **/
-unsigned int DCANTxRqstStatusGet(unsigned int baseAdd, unsigned int msgNum)
+unsigned int
+DCANTxRqstStatusGet (unsigned int baseAdd, unsigned int msgNum)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    regNum = (msgNum - 1) / 32;
-    offSet = (msgNum - 1) % 32;
+  regNum = (msgNum - 1) / 32;
+  offSet = (msgNum - 1) % 32;
 
-    /* Return the status from DCAN_TXRQ register */
-    return(HWREG(baseAdd + DCAN_TXRQ(regNum)) & (1 << offSet));
+  /* Return the status from DCAN_TXRQ register */
+  return (HWREG (baseAdd + DCAN_TXRQ (regNum)) & (1 << offSet));
 }
 
 /**
@@ -709,25 +737,26 @@ unsigned int DCANTxRqstStatusGet(unsigned int baseAdd, unsigned int msgNum)
  *          message object number whose TxRqst status is not set.
  *
  **/
-unsigned int DCANTxRqstStatGet(unsigned int baseAdd)
+unsigned int
+DCANTxRqstStatGet (unsigned int baseAdd)
 {
-    unsigned int index = 1;
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int index = 1;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    while(index < 128)
+  while (index < 128)
     {
-        regNum = (index - 1) / 32;
-        offSet = (index - 1) % 32;
+      regNum = (index - 1) / 32;
+      offSet = (index - 1) % 32;
 
-        if(!(HWREG(baseAdd + DCAN_TXRQ(regNum)) & (1 << offSet)))
+      if (!(HWREG (baseAdd + DCAN_TXRQ (regNum)) & (1 << offSet)))
         {
-            break;
+          break;
         }
-        index++;
+      index++;
     }
 
-    return(index);
+  return (index);
 }
 
 /**
@@ -742,10 +771,11 @@ unsigned int DCANTxRqstStatGet(unsigned int baseAdd)
  *          where 1 <= n <= 8 \n
  *
  **/
-unsigned int DCANNewDataXStatusGet(unsigned int baseAdd)
+unsigned int
+DCANNewDataXStatusGet (unsigned int baseAdd)
 {
-    /* Return the status from DCAN_NWDAT_X register */
-    return(HWREG(baseAdd + DCAN_NWDAT_X) & NEW_DATA_X_MASK); 
+  /* Return the status from DCAN_NWDAT_X register */
+  return (HWREG (baseAdd + DCAN_NWDAT_X) & NEW_DATA_X_MASK);
 }
 
 /**
@@ -763,16 +793,17 @@ unsigned int DCANNewDataXStatusGet(unsigned int baseAdd)
  *          1 <= msgNum <= 128.
  *
  **/
-unsigned int DCANNewDataStatusGet(unsigned int baseAdd, unsigned int msgNum)
+unsigned int
+DCANNewDataStatusGet (unsigned int baseAdd, unsigned int msgNum)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    regNum = (msgNum - 1) / 32;
-    offSet = (msgNum - 1) % 32;
+  regNum = (msgNum - 1) / 32;
+  offSet = (msgNum - 1) % 32;
 
-    /* Return the status from DCAN_NWDAT register */
-    return(HWREG(baseAdd + DCAN_NWDAT(regNum)) & (1 << offSet));
+  /* Return the status from DCAN_NWDAT register */
+  return (HWREG (baseAdd + DCAN_NWDAT (regNum)) & (1 << offSet));
 }
 
 /**
@@ -791,25 +822,26 @@ unsigned int DCANNewDataStatusGet(unsigned int baseAdd, unsigned int msgNum)
  *          message object number whose NewData status is set.
  *
  **/
-unsigned int DCANNewDataStatGet(unsigned int baseAdd)
+unsigned int
+DCANNewDataStatGet (unsigned int baseAdd)
 {
-    unsigned int index = 1;
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int index = 1;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    while(index < 128)
+  while (index < 128)
     {
-        regNum = (index - 1) / 32;
-        offSet = (index - 1) % 32;
+      regNum = (index - 1) / 32;
+      offSet = (index - 1) % 32;
 
-        if((HWREG(baseAdd + DCAN_NWDAT(regNum)) & (1 << offSet)))
+      if ((HWREG (baseAdd + DCAN_NWDAT (regNum)) & (1 << offSet)))
         {
-            break; 
+          break;
         }
-        index++;
+      index++;
     }
 
-    return(index);
+  return (index);
 }
 
 /**
@@ -824,10 +856,11 @@ unsigned int DCANNewDataStatGet(unsigned int baseAdd)
  *          where 1 <= n <= 8 \n
  *
  **/
-unsigned int DCANIntPendingXStatusGet(unsigned int baseAdd)
+unsigned int
+DCANIntPendingXStatusGet (unsigned int baseAdd)
 {
-    /* Return the status from DCAN_INTPND_X register */
-    return(HWREG(baseAdd + DCAN_INTPND_X) & INT_PEND_X_MASK);
+  /* Return the status from DCAN_INTPND_X register */
+  return (HWREG (baseAdd + DCAN_INTPND_X) & INT_PEND_X_MASK);
 }
 
 /**
@@ -845,16 +878,17 @@ unsigned int DCANIntPendingXStatusGet(unsigned int baseAdd)
  *          1 <= msgNum <= 128.
  *
  **/
-unsigned int DCANIntPendingStatusGet(unsigned int baseAdd, unsigned int msgNum)
+unsigned int
+DCANIntPendingStatusGet (unsigned int baseAdd, unsigned int msgNum)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    regNum = (msgNum - 1) / 32;
-    offSet = (msgNum - 1) % 32;
+  regNum = (msgNum - 1) / 32;
+  offSet = (msgNum - 1) % 32;
 
-    /* Return the status from DCAN_INTPND register */
-    return(HWREG(baseAdd + DCAN_INTPND(regNum)) & (1 << offSet));
+  /* Return the status from DCAN_INTPND register */
+  return (HWREG (baseAdd + DCAN_INTPND (regNum)) & (1 << offSet));
 }
 
 /**
@@ -869,10 +903,11 @@ unsigned int DCANIntPendingStatusGet(unsigned int baseAdd, unsigned int msgNum)
  *          where 1 <= n <= 8 \n
  *
  **/
-unsigned int DCANMsgValidXStatusGet(unsigned int baseAdd)
+unsigned int
+DCANMsgValidXStatusGet (unsigned int baseAdd)
 {
-    /* Return the status from DCAN_MSGVAL_X register */
-    return(HWREG(baseAdd + DCAN_MSGVAL_X) & MSG_VALID_X_MASK);
+  /* Return the status from DCAN_MSGVAL_X register */
+  return (HWREG (baseAdd + DCAN_MSGVAL_X) & MSG_VALID_X_MASK);
 }
 
 /**
@@ -890,16 +925,17 @@ unsigned int DCANMsgValidXStatusGet(unsigned int baseAdd)
  *          1 <= msgNum <= 128.
  *
  **/
-unsigned int DCANMsgValidStatusGet(unsigned int baseAdd, unsigned int msgNum)
+unsigned int
+DCANMsgValidStatusGet (unsigned int baseAdd, unsigned int msgNum)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    regNum = (msgNum - 1) / 32;
-    offSet = (msgNum - 1) % 32;
+  regNum = (msgNum - 1) / 32;
+  offSet = (msgNum - 1) % 32;
 
-    /* Return the status from DCAN_MSGVAL register */
-    return(HWREG(baseAdd + DCAN_MSGVAL(regNum)) & (1 << offSet));
+  /* Return the status from DCAN_MSGVAL register */
+  return (HWREG (baseAdd + DCAN_MSGVAL (regNum)) & (1 << offSet));
 }
 
 /**
@@ -929,28 +965,29 @@ unsigned int DCANMsgValidStatusGet(unsigned int baseAdd, unsigned int msgNum)
  *          1 <= msgNum <= 128.
  *
  **/
-void DCANIntMuxConfig(unsigned int baseAdd, unsigned int intLine,
-                      unsigned int msgNum, unsigned int maxMsgObjects)
+void
+DCANIntMuxConfig (unsigned int baseAdd, unsigned int intLine,
+                  unsigned int msgNum, unsigned int maxMsgObjects)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    if(msgNum == maxMsgObjects)
+  if (msgNum == maxMsgObjects)
     {
-        regNum = 0;
-        offSet = 0;
+      regNum = 0;
+      offSet = 0;
     }
-    else
+  else
     {
-        regNum = msgNum / 32;
-        offSet = msgNum % 32;
+      regNum = msgNum / 32;
+      offSet = msgNum % 32;
     }
 
-    /* Clear the IntMux field of DCAN_INTMUX register corresponding to msgNum */
-    HWREG(baseAdd + DCAN_INTMUX(regNum)) &= ~(1 << offSet);
+  /* Clear the IntMux field of DCAN_INTMUX register corresponding to msgNum */
+  HWREG (baseAdd + DCAN_INTMUX (regNum)) &= ~(1 << offSet);
 
-    /* Set the DCAN_INTMUX field corresponding to msgNum */
-    HWREG(baseAdd + DCAN_INTMUX(regNum)) |= ((1 & intLine) << offSet);
+  /* Set the DCAN_INTMUX field corresponding to msgNum */
+  HWREG (baseAdd + DCAN_INTMUX (regNum)) |= ((1 & intLine) << offSet);
 }
 
 /**
@@ -966,13 +1003,14 @@ void DCANIntMuxConfig(unsigned int baseAdd, unsigned int intLine,
  * \return  None. 
  *
  **/
-void DCANMsgObjValidate(unsigned int baseAdd, unsigned int regNum)
+void
+DCANMsgObjValidate (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Validate the message object */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) |= DCAN_IFARB_MSGVAL;
+  /* Validate the message object */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) |= DCAN_IFARB_MSGVAL;
 }
 
 /**
@@ -988,13 +1026,14 @@ void DCANMsgObjValidate(unsigned int baseAdd, unsigned int regNum)
  * \return  None.
  *
  **/
-void DCANMsgObjInvalidate(unsigned int baseAdd, unsigned int regNum)
+void
+DCANMsgObjInvalidate (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Invalidate the message object */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) &= ~DCAN_IFARB_MSGVAL;
+  /* Invalidate the message object */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) &= ~DCAN_IFARB_MSGVAL;
 }
 
 /**
@@ -1027,38 +1066,39 @@ void DCANMsgObjInvalidate(unsigned int baseAdd, unsigned int regNum)
  * \return  None.
  *
  **/
-void DCANCommandRegSet(unsigned int baseAdd, unsigned int cmdFlags,
-                       unsigned int objNum, unsigned int regNum)
+void
+DCANCommandRegSet (unsigned int baseAdd, unsigned int cmdFlags,
+                   unsigned int objNum, unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Clear the DCAN_IFCMD register fields */
-    HWREG(baseAdd + DCAN_IFCMD(regNum)) &= ~(DCAN_IFCMD_DMAACTIVE | 
-                                             DCAN_IFCMD_DATAA | 
-                                             DCAN_IFCMD_DATAB | 
-                                             DCAN_IFCMD_TXRQST_NEWDAT | 
+  /* Clear the DCAN_IFCMD register fields */
+  HWREG (baseAdd + DCAN_IFCMD (regNum)) &= ~(DCAN_IFCMD_DMAACTIVE |
+                                             DCAN_IFCMD_DATAA |
+                                             DCAN_IFCMD_DATAB |
+                                             DCAN_IFCMD_TXRQST_NEWDAT |
                                              DCAN_IFCMD_CLRINTPND |
-                                             DCAN_IFCMD_CONTROL | 
+                                             DCAN_IFCMD_CONTROL |
                                              DCAN_IFCMD_ARB |
-                                             DCAN_IFCMD_MASK | 
+                                             DCAN_IFCMD_MASK |
                                              DCAN_IFCMD_MESSAGENUMBER |
                                              DCAN_IFCMD_WR_RD);
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Set the DCAN_IFCMD register fields represented by cmdFlags */
-    HWREG(baseAdd + DCAN_IFCMD(regNum)) |= ((cmdFlags & 
-                                           (DCAN_IFCMD_DMAACTIVE | 
-                                            DCAN_IFCMD_DATAA | 
-                                            DCAN_IFCMD_DATAB | 
-                                            DCAN_IFCMD_TXRQST_NEWDAT |
-                                            DCAN_IFCMD_CLRINTPND |
-                                            DCAN_IFCMD_CONTROL |
-                                            DCAN_IFCMD_ARB |
-                                            DCAN_IFCMD_MASK |
-                                            DCAN_IFCMD_WR_RD)) | 
+  /* Set the DCAN_IFCMD register fields represented by cmdFlags */
+  HWREG (baseAdd + DCAN_IFCMD (regNum)) |= ((cmdFlags &
+                                             (DCAN_IFCMD_DMAACTIVE |
+                                              DCAN_IFCMD_DATAA |
+                                              DCAN_IFCMD_DATAB |
+                                              DCAN_IFCMD_TXRQST_NEWDAT |
+                                              DCAN_IFCMD_CLRINTPND |
+                                              DCAN_IFCMD_CONTROL |
+                                              DCAN_IFCMD_ARB |
+                                              DCAN_IFCMD_MASK |
+                                              DCAN_IFCMD_WR_RD)) |
                                             (objNum & DCAN_IFCMD_MESSAGENUMBER));
 }
 
@@ -1080,10 +1120,11 @@ void DCANCommandRegSet(unsigned int baseAdd, unsigned int cmdFlags,
  *          DCAN_IF_NOT_BUSY - No Transfer between IF register and message RAM.
  *
  **/
-unsigned int DCANIFBusyStatusGet(unsigned int baseAdd, unsigned int regNum)
+unsigned int
+DCANIFBusyStatusGet (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Returns the status of BUSY field from DCAN_IF_CMD register */
-    return(HWREG(baseAdd + DCAN_IFCMD(regNum)) & DCAN_IFCMD_BUSY);
+  /* Returns the status of BUSY field from DCAN_IF_CMD register */
+  return (HWREG (baseAdd + DCAN_IFCMD (regNum)) & DCAN_IFCMD_BUSY);
 }
 
 /**
@@ -1105,26 +1146,27 @@ unsigned int DCANIFBusyStatusGet(unsigned int baseAdd, unsigned int regNum)
  * \return  None.
  *
  **/
-void DCANMsgIdSet(unsigned int baseAdd, unsigned int msgId, 
-                  unsigned int idLength, unsigned int regNum)
+void
+DCANMsgIdSet (unsigned int baseAdd, unsigned int msgId,
+              unsigned int idLength, unsigned int regNum)
 {
 
-    if(idLength == DCAN_11_BIT_ID)
+  if (idLength == DCAN_11_BIT_ID)
     {
-        msgId <<= DCAN_STD_ID_SHIFT;
+      msgId <<= DCAN_STD_ID_SHIFT;
     }
-  
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
 
-    /* Clear the Msk field of DCAN_IFARB register */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) &= ~(DCAN_IFARB_MSK | DCAN_IFARB_XTD);
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Clear the Msk field of DCAN_IFARB register */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) &= ~(DCAN_IFARB_MSK | DCAN_IFARB_XTD);
 
-    /* Set the Msk field with the ID value */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) |= ((msgId & DCAN_IFARB_MSK) | 
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
+
+  /* Set the Msk field with the ID value */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) |= ((msgId & DCAN_IFARB_MSK) |
                                             (idLength & DCAN_IFARB_XTD));
 }
 
@@ -1146,20 +1188,21 @@ void DCANMsgIdSet(unsigned int baseAdd, unsigned int msgId,
  * \return  None.
  *
  **/
-void DCANMsgDirectionSet(unsigned int baseAdd, unsigned int msgDir, 
-                         unsigned int regNum)
+void
+DCANMsgDirectionSet (unsigned int baseAdd, unsigned int msgDir,
+                     unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Clear the Dir field of DCAN_IFARB register */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) &= ~DCAN_IFARB_DIR;
+  /* Clear the Dir field of DCAN_IFARB register */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) &= ~DCAN_IFARB_DIR;
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Set the Dir field with the user sent value */
-    HWREG(baseAdd + DCAN_IFARB(regNum)) |= (msgDir & DCAN_IFARB_DIR);
+  /* Set the Dir field with the user sent value */
+  HWREG (baseAdd + DCAN_IFARB (regNum)) |= (msgDir & DCAN_IFARB_DIR);
 }
 
 /**
@@ -1176,20 +1219,21 @@ void DCANMsgDirectionSet(unsigned int baseAdd, unsigned int msgDir,
  * \return  None.
  *
  **/
-void DCANDataWrite(unsigned int baseAdd, unsigned int* dataPtr, 
-                   unsigned int regNum)
+void
+DCANDataWrite (unsigned int baseAdd, unsigned int* dataPtr,
+               unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Write the lower 4 data bytes to IFDATA register */
-    HWREG(baseAdd + DCAN_IFDATA(regNum)) = *dataPtr++;
+  /* Write the lower 4 data bytes to IFDATA register */
+  HWREG (baseAdd + DCAN_IFDATA (regNum)) = *dataPtr++;
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Write the higher 4 data bytes to IFDATB register */
-    HWREG(baseAdd + DCAN_IFDATB(regNum)) = *dataPtr;
+  /* Write the higher 4 data bytes to IFDATB register */
+  HWREG (baseAdd + DCAN_IFDATB (regNum)) = *dataPtr;
 }
 
 /**
@@ -1206,14 +1250,15 @@ void DCANDataWrite(unsigned int baseAdd, unsigned int* dataPtr,
  * \return  None.
  *
  **/
-void DCANDataRead(unsigned int baseAdd, unsigned int* data, 
-                  unsigned int regNum)
+void
+DCANDataRead (unsigned int baseAdd, unsigned int* data,
+              unsigned int regNum)
 {
-    /* Read the data bytes from the DCAN_IFDATA register */
-    *data++ = HWREG(baseAdd + DCAN_IFDATA(regNum));
+  /* Read the data bytes from the DCAN_IFDATA register */
+  *data++ = HWREG (baseAdd + DCAN_IFDATA (regNum));
 
-    /* Read the data bytes from the DCAN_IFDATB register */
-    *data = HWREG(baseAdd + DCAN_IFDATB(regNum));
+  /* Read the data bytes from the DCAN_IFDATB register */
+  *data = HWREG (baseAdd + DCAN_IFDATB (regNum));
 }
 
 /**
@@ -1234,20 +1279,21 @@ void DCANDataRead(unsigned int baseAdd, unsigned int* data,
  * \return  None.
  *
  **/
-void DCANDataLengthCodeSet(unsigned int baseAdd, unsigned int dlc, 
-                           unsigned int regNum)
+void
+DCANDataLengthCodeSet (unsigned int baseAdd, unsigned int dlc,
+                       unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Clear the DLC field of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~DCAN_IFMCTL_DATALENGTHCODE;
+  /* Clear the DLC field of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~DCAN_IFMCTL_DATALENGTHCODE;
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Set the DLC field with the user sent value */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (dlc & DCAN_IFMCTL_DATALENGTHCODE);
+  /* Set the DLC field with the user sent value */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (dlc & DCAN_IFMCTL_DATALENGTHCODE);
 }
 
 /**
@@ -1270,16 +1316,17 @@ void DCANDataLengthCodeSet(unsigned int baseAdd, unsigned int dlc,
  * \return  None.
  *
  **/
-void DCANMsgObjIntEnable(unsigned int baseAdd, unsigned int intFlags, 
-                         unsigned int regNum)
+void
+DCANMsgObjIntEnable (unsigned int baseAdd, unsigned int intFlags,
+                     unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Enable Message object interrupts */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (intFlags & 
-                                            (DCAN_IFMCTL_TXIE | 
-                                             DCAN_IFMCTL_RXIE));
+  /* Enable Message object interrupts */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (intFlags &
+                                             (DCAN_IFMCTL_TXIE |
+                                              DCAN_IFMCTL_RXIE));
 }
 
 /**
@@ -1302,16 +1349,17 @@ void DCANMsgObjIntEnable(unsigned int baseAdd, unsigned int intFlags,
  * \return  None.
  *
  **/
-void DCANMsgObjIntDisable(unsigned int baseAdd, unsigned int intFlags,
-                          unsigned int regNum)
+void
+DCANMsgObjIntDisable (unsigned int baseAdd, unsigned int intFlags,
+                      unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Enable Message object interrupts */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~(intFlags &
-                                             (DCAN_IFMCTL_TXIE |
-                                              DCAN_IFMCTL_RXIE));
+  /* Enable Message object interrupts */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~(intFlags &
+                                              (DCAN_IFMCTL_TXIE |
+                                               DCAN_IFMCTL_RXIE));
 }
 
 /**
@@ -1333,20 +1381,21 @@ void DCANMsgObjIntDisable(unsigned int baseAdd, unsigned int intFlags,
  * \return  None.
  *
  **/
-void DCANFIFOEndOfBlockControl(unsigned int baseAdd, unsigned int eob, 
-                               unsigned int regNum)
+void
+DCANFIFOEndOfBlockControl (unsigned int baseAdd, unsigned int eob,
+                           unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Clear the EOB field of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~DCAN_IFMCTL_EOB;
+  /* Clear the EOB field of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~DCAN_IFMCTL_EOB;
 
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Set the EOB field with the user sent value */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (eob & DCAN_IFMCTL_EOB);
+  /* Set the EOB field with the user sent value */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (eob & DCAN_IFMCTL_EOB);
 }
 
 /**
@@ -1384,16 +1433,17 @@ void DCANFIFOEndOfBlockControl(unsigned int baseAdd, unsigned int eob,
  * \return  None.
  *
  **/
-void DCANMsgObjectMskConfig(unsigned int baseAdd, unsigned int idMsk,
-                            unsigned int msgDir, unsigned int extId,
-                            unsigned int regNum)
+void
+DCANMsgObjectMskConfig (unsigned int baseAdd, unsigned int idMsk,
+                        unsigned int msgDir, unsigned int extId,
+                        unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Write to the DCAN_IFMSK register */
-    HWREG(baseAdd + DCAN_IFMSK(regNum)) = ((idMsk & DCAN_IF1MSK_MSK) | 
-                                           (msgDir & DCAN_IFMSK_MDIR) | 
+  /* Write to the DCAN_IFMSK register */
+  HWREG (baseAdd + DCAN_IFMSK (regNum)) = ((idMsk & DCAN_IF1MSK_MSK) |
+                                           (msgDir & DCAN_IFMSK_MDIR) |
                                            (extId & DCAN_IFMSK_MXTD));
 }
 
@@ -1413,16 +1463,17 @@ void DCANMsgObjectMskConfig(unsigned int baseAdd, unsigned int idMsk,
  *          IF3 Update enable should not be set for transmit objects.
  *
  **/
-void DCANIF3RegUpdateEnableSet(unsigned int baseAdd, unsigned int msgNum)
+void
+DCANIF3RegUpdateEnableSet (unsigned int baseAdd, unsigned int msgNum)
 {
-    unsigned int regNum;
-    unsigned int offSet;
+  unsigned int regNum;
+  unsigned int offSet;
 
-    regNum = (msgNum - 1) / 32;
-    offSet = (msgNum - 1) % 32;
+  regNum = (msgNum - 1) / 32;
+  offSet = (msgNum - 1) % 32;
 
-    /* Set the DCAN_IF3UPD register with the proper value */
-    HWREG(baseAdd + DCAN_IF3UPD(regNum)) |= (1 << offSet);
+  /* Set the DCAN_IF3UPD register with the proper value */
+  HWREG (baseAdd + DCAN_IF3UPD (regNum)) |= (1 << offSet);
 }
 
 /**
@@ -1444,12 +1495,13 @@ void DCANIF3RegUpdateEnableSet(unsigned int baseAdd, unsigned int msgNum)
  * \return  None.
  *
  **/
-void DCANIF3ObservationFlagSet(unsigned int baseAdd, unsigned int obsFlags)
+void
+DCANIF3ObservationFlagSet (unsigned int baseAdd, unsigned int obsFlags)
 {
-    /* Set the appropriate flags in the DCAN_IF3OBS register */
-    HWREGB(baseAdd + DCAN_IF3OBS) |= (obsFlags & (DCAN_IF3OBS_MASK | 
-                                      DCAN_IF3OBS_ARB | DCAN_IF3OBS_CTRL | 
-                                      DCAN_IF3OBS_DATAA | DCAN_IF3OBS_DATAB));
+  /* Set the appropriate flags in the DCAN_IF3OBS register */
+  HWREGB (baseAdd + DCAN_IF3OBS) |= (obsFlags & (DCAN_IF3OBS_MASK |
+                                                 DCAN_IF3OBS_ARB | DCAN_IF3OBS_CTRL |
+                                                 DCAN_IF3OBS_DATAA | DCAN_IF3OBS_DATAB));
 }
 
 /**
@@ -1471,12 +1523,13 @@ void DCANIF3ObservationFlagSet(unsigned int baseAdd, unsigned int obsFlags)
  * \return  None.
  *
  **/
-void DCANIF3ObservationFlagClear(unsigned int baseAdd, unsigned int obsFlags)
+void
+DCANIF3ObservationFlagClear (unsigned int baseAdd, unsigned int obsFlags)
 {
-    /* Set the appropriate flags in the DCAN_IF3OBS register */
-    HWREGB(baseAdd + DCAN_IF3OBS) &= ~(obsFlags & (DCAN_IF3OBS_MASK | 
-                                       DCAN_IF3OBS_ARB | DCAN_IF3OBS_CTRL | 
-                                       DCAN_IF3OBS_DATAA| DCAN_IF3OBS_DATAB));
+  /* Set the appropriate flags in the DCAN_IF3OBS register */
+  HWREGB (baseAdd + DCAN_IF3OBS) &= ~(obsFlags & (DCAN_IF3OBS_MASK |
+                                                  DCAN_IF3OBS_ARB | DCAN_IF3OBS_CTRL |
+                                                  DCAN_IF3OBS_DATAA | DCAN_IF3OBS_DATAB));
 }
 
 /**
@@ -1495,10 +1548,11 @@ void DCANIF3ObservationFlagClear(unsigned int baseAdd, unsigned int obsFlags)
  *          DCAN_IF3_UPDATE_STATUS - IF3 Update data status \n
  *
  **/
-unsigned char DCANIF3ObservationFlagStatGet(unsigned int baseAdd)
+unsigned char
+DCANIF3ObservationFlagStatGet (unsigned int baseAdd)
 {
-    /* Return the observation flag status from the DCAN_IF3OBS register */
-    return(HWREGB(baseAdd + DCAN_IF3OBS + 1));
+  /* Return the observation flag status from the DCAN_IF3OBS register */
+  return (HWREGB (baseAdd + DCAN_IF3OBS + 1));
 }
 
 /**
@@ -1519,10 +1573,11 @@ unsigned char DCANIF3ObservationFlagStatGet(unsigned int baseAdd)
  *          DCAN_MSK_EXT_ID_READ - Read mask extended identifier \n
  *
  **/
-unsigned int DCANIFMaskStatusGet(unsigned int baseAdd, unsigned int regNum)
+unsigned int
+DCANIFMaskStatusGet (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Return the status of DCAN_IF_MSK register */
-    return(HWREG(baseAdd + DCAN_IFMSK(regNum)));
+  /* Return the status of DCAN_IF_MSK register */
+  return (HWREG (baseAdd + DCAN_IFMSK (regNum)));
 }
 
 /**
@@ -1544,10 +1599,11 @@ unsigned int DCANIFMaskStatusGet(unsigned int baseAdd, unsigned int regNum)
  *          DCAN_MSGVAL_READ - Read message valid status \n
  *
  **/
-unsigned int DCANIFArbStatusGet(unsigned int baseAdd, unsigned int regNum)
+unsigned int
+DCANIFArbStatusGet (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Return the status of DCAN_IF_ARB register */
-    return(HWREG(baseAdd + DCAN_IFARB(regNum)));
+  /* Return the status of DCAN_IF_ARB register */
+  return (HWREG (baseAdd + DCAN_IFARB (regNum)));
 }
 
 /**
@@ -1575,10 +1631,11 @@ unsigned int DCANIFArbStatusGet(unsigned int baseAdd, unsigned int regNum)
  *          DCAN_NEWDAT_READ - Read new data status \n
  *
  **/
-unsigned int DCANIFMsgCtlStatusGet(unsigned int baseAdd, unsigned int regNum)
+unsigned int
+DCANIFMsgCtlStatusGet (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Return the status of DCAN_IFMCTl register */
-    return(HWREG(baseAdd + DCAN_IFMCTL(regNum)));
+  /* Return the status of DCAN_IFMCTl register */
+  return (HWREG (baseAdd + DCAN_IFMCTL (regNum)));
 }
 
 /**
@@ -1594,13 +1651,14 @@ unsigned int DCANIFMsgCtlStatusGet(unsigned int baseAdd, unsigned int regNum)
  * \return  None.
  *
  **/
-void DCANClrIntPnd(unsigned int baseAdd, unsigned int regNum)
+void
+DCANClrIntPnd (unsigned int baseAdd, unsigned int regNum)
 {
-    /* Wait in loop until busy bit is cleared */
-    while(DCANIFBusyStatusGet(baseAdd, regNum));
+  /* Wait in loop until busy bit is cleared */
+  while (DCANIFBusyStatusGet (baseAdd, regNum));
 
-    /* Clear the IntPnd bit of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~(DCAN_IFMCTL_INTPND);
+  /* Clear the IntPnd bit of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~(DCAN_IFMCTL_INTPND);
 }
 
 /**
@@ -1625,14 +1683,15 @@ void DCANClrIntPnd(unsigned int baseAdd, unsigned int regNum)
  *          using this API.
  *
  **/
-void DCANNewDataControl(unsigned int baseAdd, unsigned int newDat, 
-                        unsigned int regNum)
+void
+DCANNewDataControl (unsigned int baseAdd, unsigned int newDat,
+                    unsigned int regNum)
 {
-    /* Clear the NewDat bit of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~(DCAN_IFMCTL_NEWDAT);
+  /* Clear the NewDat bit of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~(DCAN_IFMCTL_NEWDAT);
 
-    /* Set the NewDat bit with user sent value */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (newDat & DCAN_IFMCTL_NEWDAT);
+  /* Set the NewDat bit with user sent value */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (newDat & DCAN_IFMCTL_NEWDAT);
 }
 
 /**
@@ -1653,14 +1712,15 @@ void DCANNewDataControl(unsigned int baseAdd, unsigned int newDat,
  * \return  None.
  *
  **/
-void DCANUseAcceptanceMaskControl(unsigned int baseAdd, unsigned int uMask, 
-                                  unsigned int regNum)
+void
+DCANUseAcceptanceMaskControl (unsigned int baseAdd, unsigned int uMask,
+                              unsigned int regNum)
 {
-    /* Clear the UMask bit of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~(DCAN_IFMCTL_UMASK);
+  /* Clear the UMask bit of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~(DCAN_IFMCTL_UMASK);
 
-    /* Set the UMask bit of DCAN_IFMCTL register with the user sent value */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (uMask & DCAN_IFMCTL_UMASK);
+  /* Set the UMask bit of DCAN_IFMCTL register with the user sent value */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (uMask & DCAN_IFMCTL_UMASK);
 }
 
 /**
@@ -1685,16 +1745,16 @@ void DCANUseAcceptanceMaskControl(unsigned int baseAdd, unsigned int uMask,
  *          using this API.
  *
  **/
-void DCANTransmitRequestControl(unsigned int baseAdd, unsigned int txRqst,
-                                unsigned int regNum)
+void
+DCANTransmitRequestControl (unsigned int baseAdd, unsigned int txRqst,
+                            unsigned int regNum)
 {
-    /* Clear the TxRqst bit of DCAN_IFMCTL register */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) &= ~(DCAN_IFMCTL_TXRQST);
+  /* Clear the TxRqst bit of DCAN_IFMCTL register */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) &= ~(DCAN_IFMCTL_TXRQST);
 
-    /* Set the TxRqst bit with the user sent value */
-    HWREG(baseAdd + DCAN_IFMCTL(regNum)) |= (txRqst & DCAN_IFMCTL_TXRQST);
+  /* Set the TxRqst bit with the user sent value */
+  HWREG (baseAdd + DCAN_IFMCTL (regNum)) |= (txRqst & DCAN_IFMCTL_TXRQST);
 }
-
 
 /**
  * \brief   This function will enable the module clocks for DCAN.
@@ -1702,78 +1762,79 @@ void DCANTransmitRequestControl(unsigned int baseAdd, unsigned int txRqst,
  * \return  None.
  *
  */
-void DCANModuleClkConfig(void)
+void
+DCANModuleClkConfig (void)
 {
-    HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) =
-                             CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) =
+          CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
-     CM_PER_L3S_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+          CM_PER_L3S_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) =
-                             CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) =
+          CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
-     CM_PER_L3_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+          CM_PER_L3_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) =
-                             CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) =
+          CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
-                               CM_PER_L3_INSTR_CLKCTRL_MODULEMODE) !=
-                                   CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
+          CM_PER_L3_INSTR_CLKCTRL_MODULEMODE) !=
+         CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) =
-                             CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) =
+          CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
-        CM_PER_L3_CLKCTRL_MODULEMODE) != CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
+          CM_PER_L3_CLKCTRL_MODULEMODE) != CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) =
-                             CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+  HWREG (SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) =
+          CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
-                              CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL) !=
-                                CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+          CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL) !=
+         CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) =
-                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) =
+          CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
-                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL) !=
-                               CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+          CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL) !=
+         CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) =
-                             CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE;
+  HWREG (SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) =
+          CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) &
-      CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) &
+          CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) = 
-                                  CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE;
+  HWREG (SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) =
+          CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) & 
-                         CM_PER_DCAN1_CLKCTRL_MODULEMODE) != 
-                         CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_DCAN1_CLKCTRL) &
+          CM_PER_DCAN1_CLKCTRL_MODULEMODE) !=
+         CM_PER_DCAN1_CLKCTRL_MODULEMODE_ENABLE);
 
-    HWREG(SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) = 
-                                  CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE;
+  HWREG (SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) =
+          CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE;
 
-    while((HWREG(SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) & 
-                         CM_PER_DCAN0_CLKCTRL_MODULEMODE) != 
-                         CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE);
+  while ((HWREG (SOC_CM_PER_REGS + CM_PER_DCAN0_CLKCTRL) &
+          CM_PER_DCAN0_CLKCTRL_MODULEMODE) !=
+         CM_PER_DCAN0_CLKCTRL_MODULEMODE_ENABLE);
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
-            CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+  while (!(HWREG (SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+           CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
-            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+  while (!(HWREG (SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+           CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+  while (!(HWREG (SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
            (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
-            CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK))); 
+            CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+  while (!(HWREG (SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
            (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
             CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK)));
 }
@@ -1786,16 +1847,17 @@ void DCANModuleClkConfig(void)
  * \return  None.
  *
  */
-void DCANMsgRAMInit(unsigned int instanceNum)
+void
+DCANMsgRAMInit (unsigned int instanceNum)
 {
-    if(1 == instanceNum)
+  if (1 == instanceNum)
     {
-        HWREG(SOC_CONTROL_REGS + CONTROL_DCAN_RAMINIT) |= 
+      HWREG (SOC_CONTROL_REGS + CONTROL_DCAN_RAMINIT) |=
               CONTROL_DCAN_RAMINIT_DCAN0_RAMINIT_START;
     }
-    else
+  else
     {
-        return;
-    }  
+      return;
+    }
 }
 /****************************** END OF FILE ***********************************/
