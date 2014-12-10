@@ -76,7 +76,9 @@ static volatile unsigned int isrRxFlag = 1;
 static volatile unsigned int isrFlag = 1;
 static unsigned int canData[2];
 static unsigned int canId = 0;
+static unsigned int canId_Tx = 0;
 static unsigned int bytes = 0;
+unsigned int data_Tx[] = {0x32, 0x10};
 can_frame entryRx;
 can_frame entryTx;
 
@@ -128,30 +130,31 @@ main (void)
   while (index--)
     {
       /* Invalidate all message objects in the message RAM */
+      CANInValidateMsgObject (SOC_DCAN_0_REGS, index, DCAN_IF1_REG);
       CANInValidateMsgObject (SOC_DCAN_0_REGS, index, DCAN_IF2_REG);
     }
-  unsigned int data_1[2] = {0x1100, 0x1111};
   entryRx.flag = rxflag;
   entryRx.id = canId;
-  entryRx.data = data_1;
-  shm_write_uint32 (12, *(entryRx.data));
+
   /* 
    ** Configure a receive message object to accept CAN 
    ** frames with standard ID.
    */
   CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryRx);
 
-  unsigned int data_2[2] = {0x1100, 0x2222};
-  entryTx.flag = (CAN_EXT_FRAME | CAN_MSG_DIR_TX | CAN_DATA_FRAME);
-  entryTx.id = canId;
-  entryTx.data = data_2;
+  entryTx.flag = (CAN_MSG_DIR_TX | CAN_DATA_FRAME);
+  entryTx.id = canId_Tx;
+  entryTx.data = data_Tx;
 
   /*
    ** Configure a transmit message object to transmit CAN
    ** frames with extended ID.
    */
-  CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
-
+  i = 3;
+  while (i--)
+    {
+      CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
+    }
   /* Start the CAN transfer */
   DCANNormalModeSet (SOC_DCAN_0_REGS);
 
@@ -159,7 +162,7 @@ main (void)
   //  DCANIntEnable(SOC_DCAN_0_REGS, DCAN_ERROR_INT);
 
   /* Enable the interrupt line 0 of DCAN module */
-  //  DCANIntLineEnable(SOC_DCAN_0_REGS, DCAN_INT_LINE0);
+  DCANIntLineEnable (SOC_DCAN_0_REGS, DCAN_INT_LINE0);
 
 
   /* Core loop */
@@ -169,7 +172,8 @@ main (void)
       shm_write_uint32 (REG_Len * 0, i++);
       shm_write_uint32 (REG_Len * 1, HWREG (SOC_DCAN_0_REGS + DCAN_ES));
       shm_write_uint32 (REG_Len * 2, HWREG (SOC_DCAN_0_REGS + DCAN_BTR));
-      shm_write_uint32 (REG_Len * 3, HWREG (SOC_DCAN_0_REGS + DCAN_INT_LINE0_STAT));
+      shm_write_uint32 (REG_Len * 3, DCANIntRegStatusGet (SOC_DCAN_0_REGS, DCAN_INT_LINE0_STAT));
+      shm_write_uint32 (REG_Len * 4, DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF1_REG));
 
       DCANParityIsr ();
       DCANIsr0 ();
@@ -282,13 +286,34 @@ DCANIsr0 (void)
         {
           /* Get the number of the message object which caused the interrupt */
           msgNum = DCANIntRegStatusGet (SOC_DCAN_0_REGS, DCAN_INT_LINE0_STAT);
-          shm_write_uint32 (REG_Len * 4, msgNum);
+          shm_write_uint32 (REG_Len * 10, msgNum);
 
           /* Interrupt handling for transmit objects */
-          if (msgNum < (CAN_NUM_OF_MSG_OBJS / 2))
+          if (msgNum < (CAN_NUM_OF_MSG_OBJS / 2)&& (msgNum < CAN_NUM_OF_MSG_OBJS))
             {
+              CANReadMsgObjData (SOC_DCAN_0_REGS, msgNum, (unsigned int*) canData,
+                                 DCAN_IF1_REG);
+
               /* Clear the Interrupt pending status */
               CANClrIntPndStat (SOC_DCAN_0_REGS, msgNum, DCAN_IF1_REG);
+
+              dataPtr = (unsigned char*) canData;
+
+              //     ConsoleUtilsPrintf("Data received = ");
+
+              bytes = (DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF1_REG) &
+                       DCAN_DAT_LEN_CODE_READ);
+              shm_write_uint32 (REG_Len * (11 + index), bytes);
+
+              shm_write_uint32 (REG_Len * (12), *canData);
+              shm_write_uint32 (REG_Len * (13), *(canData + 1));
+
+              /* Print the received data bytes on the UART console */
+              for (index = 0; index < bytes; index++)
+                {
+                  // ConsoleUtilsPrintf("%c", *dataPtr++);
+                  shm_write_uint32 (REG_Len * (14 + index), *dataPtr++);
+                }
             }
 
           if ((msgNum >= (CAN_NUM_OF_MSG_OBJS / 2)) && (msgNum < CAN_NUM_OF_MSG_OBJS))
@@ -318,12 +343,15 @@ DCANIsr0 (void)
 
               bytes = (DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG) &
                        DCAN_DAT_LEN_CODE_READ);
+              shm_write_uint32 (REG_Len * (11 + index), bytes);
 
+              shm_write_uint32 (REG_Len * (12), *canData);
+              shm_write_uint32 (REG_Len * (13), *(canData + 1));
               /* Print the received data bytes on the UART console */
               for (index = 0; index < bytes; index++)
                 {
                   // ConsoleUtilsPrintf("%c", *dataPtr++);
-                  shm_write_uint32 (REG_Len * (5 + index), *dataPtr++);
+                  shm_write_uint32 (REG_Len * (14 + index), *dataPtr++);
                 }
 
               //     ConsoleUtilsPrintf("\r\n");

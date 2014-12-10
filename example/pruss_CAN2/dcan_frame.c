@@ -26,7 +26,7 @@
 
 /* Include the necessary header files */
 #include "dcan_frame.h"
-#include "hw_dcan.h"
+#include "../../include/include/hw/hw_dcan.h"
 #include "dcan.h"
 
 #define DCAN_ID_MASK           (0x0u)
