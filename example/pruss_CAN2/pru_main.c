@@ -75,12 +75,16 @@ static unsigned int rxflag = (CAN_DATA_FRAME | CAN_MSG_DIR_RX);
 static volatile unsigned int isrRxFlag = 1;
 static volatile unsigned int isrFlag = 1;
 static unsigned int canData[2];
-static unsigned int canId = 0;
-static unsigned int canId_Tx = 0;
+static unsigned int canId = 2;
+static unsigned int canId_Tx = 2;
 static unsigned int bytes = 0;
-unsigned int data_Tx[] = {0x32, 0x10};
 can_frame entryRx;
 can_frame entryTx;
+
+//0x87654321 0x90
+//the data to be sent need to be two 32bits variables
+unsigned int data_Tx[] = {(0x00000012 | 0x00003400 | 0x00560000 | 0x78000000), 0x90};
+//unsigned int data_Tx[] = {0x12, 0x34, 0x56, 0x78, 0x90};
 
 /******************************************************************************
  **                      INTERNAL FUNCTION DEFINITIONS
@@ -144,26 +148,25 @@ main (void)
 
   entryTx.flag = (CAN_MSG_DIR_TX | CAN_DATA_FRAME);
   entryTx.id = canId_Tx;
+  // entryTx.dlc = sizeof (data_Tx) / sizeof (data_Tx[0]);
+  entryTx.dlc = 5; // this is the number count by char(1 Byte)
   entryTx.data = data_Tx;
 
   /*
    ** Configure a transmit message object to transmit CAN
-   ** frames with extended ID.
+   ** frames with standard ID.
    */
-  i = 3;
-  while (i--)
-    {
-      CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
-    }
+
+  CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
+
   /* Start the CAN transfer */
   DCANNormalModeSet (SOC_DCAN_0_REGS);
 
   /* Enable the error interrupts */
-  //  DCANIntEnable(SOC_DCAN_0_REGS, DCAN_ERROR_INT);
+  DCANIntEnable (SOC_DCAN_0_REGS, DCAN_ERROR_INT);
 
   /* Enable the interrupt line 0 of DCAN module */
   DCANIntLineEnable (SOC_DCAN_0_REGS, DCAN_INT_LINE0);
-
 
   /* Core loop */
   i = 0;
@@ -195,12 +198,13 @@ ConfigureDCAN (void)
   /* Enable the write access to the DCAN configuration registers */
   DCANConfigRegWriteAccessControl (SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_ENABLE);
 
+  /* Configure the bit timing values for CAN communication */
+  CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
+
+  // set it to test mode: internal loop-back
   DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
 
   DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
-
-  /* Configure the bit timing values for CAN communication */
-  CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
 
   /* Disable the write access to the DCAN configuration registers */
   DCANConfigRegWriteAccessControl (SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_DISABLE);
@@ -289,31 +293,10 @@ DCANIsr0 (void)
           shm_write_uint32 (REG_Len * 10, msgNum);
 
           /* Interrupt handling for transmit objects */
-          if (msgNum < (CAN_NUM_OF_MSG_OBJS / 2)&& (msgNum < CAN_NUM_OF_MSG_OBJS))
+          if (msgNum < (CAN_NUM_OF_MSG_OBJS / 2))
             {
-              CANReadMsgObjData (SOC_DCAN_0_REGS, msgNum, (unsigned int*) canData,
-                                 DCAN_IF1_REG);
-
               /* Clear the Interrupt pending status */
-              CANClrIntPndStat (SOC_DCAN_0_REGS, msgNum, DCAN_IF1_REG);
-
-              dataPtr = (unsigned char*) canData;
-
-              //     ConsoleUtilsPrintf("Data received = ");
-
-              bytes = (DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF1_REG) &
-                       DCAN_DAT_LEN_CODE_READ);
-              shm_write_uint32 (REG_Len * (11 + index), bytes);
-
-              shm_write_uint32 (REG_Len * (12), *canData);
-              shm_write_uint32 (REG_Len * (13), *(canData + 1));
-
-              /* Print the received data bytes on the UART console */
-              for (index = 0; index < bytes; index++)
-                {
-                  // ConsoleUtilsPrintf("%c", *dataPtr++);
-                  shm_write_uint32 (REG_Len * (14 + index), *dataPtr++);
-                }
+              CANClrIntPndStat (SOC_DCAN_0_REGS, msgNum, DCAN_IF2_REG);
             }
 
           if ((msgNum >= (CAN_NUM_OF_MSG_OBJS / 2)) && (msgNum < CAN_NUM_OF_MSG_OBJS))
@@ -345,13 +328,15 @@ DCANIsr0 (void)
                        DCAN_DAT_LEN_CODE_READ);
               shm_write_uint32 (REG_Len * (11 + index), bytes);
 
-              shm_write_uint32 (REG_Len * (12), *canData);
-              shm_write_uint32 (REG_Len * (13), *(canData + 1));
+              //  shm_write_uint32 (REG_Len * (12), *canData);
+              // shm_write_uint32 (REG_Len * (13), *(canData + 1));
               /* Print the received data bytes on the UART console */
               for (index = 0; index < bytes; index++)
                 {
                   // ConsoleUtilsPrintf("%c", *dataPtr++);
-                  shm_write_uint32 (REG_Len * (14 + index), *dataPtr++);
+
+                  // store char data in 32bits, so only low 1 Byte is used
+                  shm_write_uint32 (REG_Len * (14 + index), *(dataPtr++));
                 }
 
               //     ConsoleUtilsPrintf("\r\n");

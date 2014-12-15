@@ -7,7 +7,7 @@
 #include "pruss_intc_mapping.h"
 #include "../common/mio.h"
 
-#define MEM_SIZE 16
+#define MEM_SIZE 20
 
 /* host pru shared memory */
 
