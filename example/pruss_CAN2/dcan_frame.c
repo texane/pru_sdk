@@ -30,6 +30,7 @@
 #include "dcan.h"
 
 #define DCAN_ID_MASK           (0x0u)
+extern unsigned int tx_flag ;
 
 /**
  * \brief   This function will configure a message object in the DCAN message 
@@ -44,6 +45,7 @@ void CANMsgObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
     if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_TX)) {
         /* Configure a transmit message object */
         CANTxObjectConfig(baseAdd, canPtr);
+        tx_flag = 1;
     } else if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_RX)) {
         /* Configure a receive message object */
         CANRxObjectConfig(baseAdd, canPtr);

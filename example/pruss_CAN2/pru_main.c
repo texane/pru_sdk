@@ -42,6 +42,7 @@
 #include "../../include/include/armv7a/am335x/evmAM335x.h"
 #include "../../include/include/pruss.h"
 #include "../../include/include/hw/hw_types.h"
+#include "../../include/include/hw/hw_control_AM335x.h"
 #include "dcan.h"
 #include "pru_hal.h"
 #include "dcan_frame.h"
@@ -64,7 +65,6 @@
  ******************************************************************************/
 static void DCANAintcConfigure (void);
 static void ConfigureDCAN (void);
-static void DCANParityIsr (void);
 static void DCANIsr0 (void);
 
 /******************************************************************************
@@ -78,6 +78,9 @@ static unsigned int canData[2];
 static unsigned int canId = 2;
 static unsigned int canId_Tx = 2;
 static unsigned int bytes = 0;
+static unsigned int rx_count = 0;
+static unsigned int tx_count = 0;
+unsigned int tx_flag = 0;
 can_frame entryRx;
 can_frame entryTx;
 
@@ -107,7 +110,7 @@ main (void)
   DCANModuleClkConfig ();
 
   /* Perform the pinmux for DCAN0 */
-  //   DCANPinMuxSetUp(1);
+  DCANPinMuxSetUp ();
 
   /* Initialize the DCAN message RAM */
   DCANMsgRAMInit (1);
@@ -177,9 +180,21 @@ main (void)
       shm_write_uint32 (REG_Len * 2, HWREG (SOC_DCAN_0_REGS + DCAN_BTR));
       shm_write_uint32 (REG_Len * 3, DCANIntRegStatusGet (SOC_DCAN_0_REGS, DCAN_INT_LINE0_STAT));
       shm_write_uint32 (REG_Len * 4, DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF1_REG));
+      shm_write_uint32 (REG_Len * 5, DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG));
+      shm_write_uint32 (REG_Len * 6, rx_count);
+      shm_write_uint32 (REG_Len * 7, tx_count);
+      shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1)));
+      shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1)));
 
-      DCANParityIsr ();
       DCANIsr0 ();
+
+      entryTx.data[0] = i;
+      if (tx_flag == 0)
+        {
+          CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
+        }
+
+      __delay_cycles (100000000);
     }
 }
 
@@ -201,48 +216,15 @@ ConfigureDCAN (void)
   /* Configure the bit timing values for CAN communication */
   CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
 
-  // set it to test mode: internal loop-back
+  // set it to test mode:
   DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
-
-  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  // internal loop-back
+  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  // external loop-back
+  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
 
   /* Disable the write access to the DCAN configuration registers */
   DCANConfigRegWriteAccessControl (SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_DISABLE);
-}
-
-/*
- ** DCAN Parity error interrupt handler.
- */
-static void
-DCANParityIsr (void)
-{
-  unsigned int errVal;
-  unsigned int wrdNum;
-  unsigned int msgNum;
-
-  if (DCANIntRegStatusGet (SOC_DCAN_0_REGS, DCAN_INT_LINE0_STAT) ==
-      DCAN_ERROR_OCCURED)
-    {
-      /* Check the status of DCAN Status and error register */
-      errVal = DCANErrAndStatusRegInfoGet (SOC_DCAN_0_REGS);
-
-      if (errVal & DCAN_PARITY_ERR_DETECTED)
-        {
-          /* Read the word number where parity error got detected */
-          wrdNum = DCANParityErrCdRegStatusGet (SOC_DCAN_0_REGS,
-                                                DCAN_PARITY_ERR_WRD_NUM);
-
-          /* Read the message number where parity error got detected */
-          msgNum = DCANParityErrCdRegStatusGet (SOC_DCAN_0_REGS,
-                                                DCAN_PARITY_ERR_MSG_NUM);
-
-          //    ConsoleUtilsPrintf("\nParity error has occured in message number ");
-          //    ConsoleUtilsPrintf("%d", msgNum);
-          //    ConsoleUtilsPrintf(" and word number ");
-          //    ConsoleUtilsPrintf("%d", wrdNum);
-          //    ConsoleUtilsPrintf("\n");
-        }
-    }
 }
 
 /*
@@ -297,6 +279,8 @@ DCANIsr0 (void)
             {
               /* Clear the Interrupt pending status */
               CANClrIntPndStat (SOC_DCAN_0_REGS, msgNum, DCAN_IF2_REG);
+              tx_count++;
+              tx_flag = 0;
             }
 
           if ((msgNum >= (CAN_NUM_OF_MSG_OBJS / 2)) && (msgNum < CAN_NUM_OF_MSG_OBJS))
@@ -304,7 +288,7 @@ DCANIsr0 (void)
               /* Read a received message from message RAM to interface register */
               CANReadMsgObjData (SOC_DCAN_0_REGS, msgNum, (unsigned int*) canData,
                                  DCAN_IF2_REG);
-
+              rx_count++;
               if ((DCANIFArbStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG) &
                    DCAN_EXT_ID_READ) == DCAN_29_BIT_ID)
                 {
@@ -341,11 +325,11 @@ DCANIsr0 (void)
 
               //     ConsoleUtilsPrintf("\r\n");
 
-              isrFlag = 0;
+              //   isrFlag = 0;
 
               /* Populate the can_frame structure with the CAN frame information */
-              entryRx.dlc = bytes;
-              entryRx.data = (unsigned int*) canData;
+              //    entryRx.dlc = bytes;
+              //    entryRx.data = (unsigned int*) canData;
 
               /* Configure a transmit message object */
               //CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);

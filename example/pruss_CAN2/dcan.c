@@ -46,6 +46,7 @@
 #include "../../include/include/hw/hw_cm_per.h"
 #include "../../include/include/hw/hw_control_AM335x.h"
 #include "dcan.h"
+#include "../../include/include/hw/hw_dcan.h"
 
 /*******************************************************************************
  *                       INTERNAL MACRO DEFINITIONS
@@ -1859,5 +1860,31 @@ DCANMsgRAMInit (unsigned int instanceNum)
     {
       return;
     }
+}
+
+/**
+ * \brief   This function selects the DCAN pins for use. The DCAN pins
+ *          are multiplexed with pins of other peripherals in the SoC
+ *
+ * \param   instanceNum       The DCAN instance to be used.
+ *
+ * \return  TRUE/FALSE.
+ *
+ */
+void
+DCANPinMuxSetUp (void)
+{
+
+  /* Pin Mux for DCAN0 Tx Pin */
+  HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1)) =
+          DCAN_SLEWFAST_RXDISABLED_PULLDWN_PUPDENABLED_MODE2;
+
+  /* Pin Mux for DCAN0 Rx Pin */
+  HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1)) =
+          DCAN_SLEWFAST_RXENABLED_PULLUP_PUPDENABLED_MODE2;
+
+  // HWREG (SOC_DCAN_0_REGS + DCAN_TIOC) |= DCAN_TIOC_FUNC;
+
+  // HWREG (SOC_DCAN_0_REGS + DCAN_TIOC) |= DCAN_TIOC_DIR;
 }
 /****************************** END OF FILE ***********************************/

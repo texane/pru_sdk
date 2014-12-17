@@ -155,7 +155,7 @@ extern void HSMMCSDModuleClkConfig(void);
 extern unsigned int HSMMCSDPinMuxSetup(void);
 extern unsigned int TSCADCPinMuxSetUp(void);
 extern void UPDNPinControl(void);
-extern unsigned int DCANPinMuxSetUp(unsigned int instanceNum);
+extern void DCANPinMuxSetUp(void);
 extern void DCANMsgRAMInit(unsigned int instanceNum);
 extern void DCANModuleClkConfig(void);
 extern void USB0ModuleClkConfig(void);
