@@ -32,12 +32,3 @@ pru:
 	$(HEXBIN) $(PRU_CGT_DIR)/bin.cmd $(BUILD_DIR)/pru_main.elf
 	cp *.bin $(BUILD_DIR)
 	rm *.bin
-
-
-################### host building#################
-
-
-
-#include $(PRU_SDK_DIR)/build/top.mk
-
-
