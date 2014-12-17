@@ -9,3 +9,4 @@
 **/pru_main.map
 
 /example/pruss_UART/build/
+/example/pruss_CAN2/build/
