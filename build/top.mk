@@ -1,7 +1,10 @@
-CROSS_COMPILE ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-
+C_FILES := host_main.c ../common/mio.c
+DTS_FILES := pru_enable-00A0.dts
+C_FLAGS := -DSTART_ADDR=$(START_ADDR)
 
-#PRU_SDK_DIR ?= /home/longqi/pru_sdk
 PRU_SDK_DIR ?= $(shell pwd)/../..
+
+CROSS_COMPILE ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)gcc
@@ -19,11 +22,14 @@ BIN_FILES := $(P_FILES:.p=.bin)
 O_FILES := $(C_FILES:.c=.o)
 DTBO_FILES := $(DTS_FILES:.dts=.dtbo)
 
+BUILD_DIR = build
+
 all:	main $(BIN_FILES) $(DTBO_FILES)
 
 main:	$(O_FILES)
-	$(LD) -static -o $@ $(O_FILES) $(L_FLAGS) $(L_LIBS)
-	$(STRIP) $@
+	$(LD) -static -o $(BUILD_DIR)/$@ $(O_FILES) $(L_FLAGS) $(L_LIBS)
+	$(STRIP) $(BUILD_DIR)/$@
+	rm *.o
 
 %.bin : %.p
 	$(PASM) -V2 -I$(PRU_SDK_DIR)/include -b $<
