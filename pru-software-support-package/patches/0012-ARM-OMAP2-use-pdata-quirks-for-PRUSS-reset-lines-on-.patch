@@ -1,0 +1,65 @@
+From 282171232bd0286650abdb1358acddeee1b11fc6 Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Thu, 15 May 2014 12:17:15 -0500
+Subject: [PATCH 12/21] ARM: OMAP2+: use pdata quirks for PRUSS reset lines on
+ AM335x
+
+The omap_device API is needed to perform the reset management for
+any IP instances with PRCM RSTCTRL registers (hard reset lines).
+This API is limited to the mach-omap2 layer, and cannot be exposed
+to drivers layer directly. So use platform data ops and pdata quirks
+for the PRUSS IP in AM335x SoCs to plumb the required omap_device
+API. The PRUSS remoteproc driver can then use these pdata ops to
+achieve the required reset functionality.
+
+This is being implemented this way as there is no separate reset
+driver at the moment.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ arch/arm/mach-omap2/pdata-quirks.c |   14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index 89e79fa..b1b3b8d 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -11,14 +11,24 @@
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/of_platform.h>
++#include <linux/platform_data/remoteproc-pruss.h>
+ 
+ #include "common.h"
++#include "omap_device.h"
+ 
+ struct pdata_init {
+ 	const char *compatible;
+ 	void (*fn)(void);
+ };
+ 
++#ifdef CONFIG_SOC_AM33XX
++static struct pruss_platform_data pruss_pdata = {
++	.reset_name = "pruss",
++	.assert_reset = omap_device_assert_hardreset,
++	.deassert_reset = omap_device_deassert_hardreset,
++};
++#endif
++
+ /*
+  * Few boards still need auxdata populated before we populate
+  * the dev entries in of_platform_populate().
+@@ -28,6 +38,10 @@ static struct pdata_init auxdata_quirks[] __initdata = {
+ };
+ 
+ static struct of_dev_auxdata omap_auxdata_lookup[] __initdata = {
++#ifdef CONFIG_SOC_AM33XX
++	OF_DEV_AUXDATA("ti,am335x-pruss", 0x4a300000, "4a300000.pruss",
++		       &pruss_pdata),
++#endif
+ 	{ /* sentinel */ },
+ };
+ 
+-- 
+1.7.9.5
+

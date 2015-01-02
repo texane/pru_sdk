@@ -1,0 +1,113 @@
+From 2e2a3e0fe29ce7f43908149bc84efcdf28d5713a Mon Sep 17 00:00:00 2001
+From: Tony Lindgren <tony@atomide.com>
+Date: Wed, 25 Sep 2013 15:44:39 -0700
+Subject: [PATCH 05/21] ARM: OMAP2+: Add quirk support for legacy platform
+ data init
+
+We want to drop the board-*.c files but keep things working.
+Let's make it a bit easier to support legacy platform data
+init with quirks. This also keeps board-generic.c clean from
+board specific hacks.
+
+For now, the quirks table is empty, that is populated
+in the later patches.
+
+[3.12 backport changes]
+ - Dropped including common-board-devices.h and dss-common.h,
+   as there are no dependencies.
+
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+[s-anna@ti.com: backport upstream commit 6a08e1e from v3.13]
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ arch/arm/mach-omap2/Makefile        |    2 +-
+ arch/arm/mach-omap2/board-generic.c |    1 +
+ arch/arm/mach-omap2/common.h        |    2 ++
+ arch/arm/mach-omap2/pdata-quirks.c  |   37 +++++++++++++++++++++++++++++++++++
+ 4 files changed, 41 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/mach-omap2/pdata-quirks.c
+
+diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
+index 881fae2..1d8b59f 100644
+--- a/arch/arm/mach-omap2/Makefile
++++ b/arch/arm/mach-omap2/Makefile
+@@ -236,7 +236,7 @@ obj-y					+= drm.o
+ endif
+ 
+ # Specific board support
+-obj-$(CONFIG_MACH_OMAP_GENERIC)		+= board-generic.o
++obj-$(CONFIG_MACH_OMAP_GENERIC)		+= board-generic.o pdata-quirks.o
+ obj-$(CONFIG_MACH_OMAP_H4)		+= board-h4.o
+ obj-$(CONFIG_MACH_OMAP_2430SDP)		+= board-2430sdp.o
+ obj-$(CONFIG_MACH_OMAP3_BEAGLE)		+= board-omap3beagle.o
+diff --git a/arch/arm/mach-omap2/board-generic.c b/arch/arm/mach-omap2/board-generic.c
+index 4a0c83b..07d923e 100644
+--- a/arch/arm/mach-omap2/board-generic.c
++++ b/arch/arm/mach-omap2/board-generic.c
+@@ -56,6 +56,7 @@ static void __init omap_generic_init(void)
+ 	omap_sdrc_init(NULL, NULL);
+ 
+ 	of_platform_populate(NULL, omap_dt_match_table, NULL, NULL);
++	pdata_quirks_init();
+ 
+ 	/*
+ 	 * HACK: call display setup code for selected boards to enable omapdss.
+diff --git a/arch/arm/mach-omap2/common.h b/arch/arm/mach-omap2/common.h
+index e3ea35f..38131f6 100644
+--- a/arch/arm/mach-omap2/common.h
++++ b/arch/arm/mach-omap2/common.h
+@@ -309,6 +309,8 @@ static inline void omap5_cpu_resume(void)
+ 
+ #endif
+ 
++void pdata_quirks_init(void);
++
+ struct omap_sdrc_params;
+ extern void omap_sdrc_init(struct omap_sdrc_params *sdrc_cs0,
+ 				      struct omap_sdrc_params *sdrc_cs1);
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+new file mode 100644
+index 0000000..20ba902
+--- /dev/null
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -0,0 +1,37 @@
++/*
++ * Legacy platform_data quirks
++ *
++ * Copyright (C) 2013 Texas Instruments
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#include <linux/clk.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++
++#include "common.h"
++
++struct pdata_init {
++	const char *compatible;
++	void (*fn)(void);
++};
++
++static struct pdata_init pdata_quirks[] __initdata = {
++	{ /* sentinel */ },
++};
++
++void __init pdata_quirks_init(void)
++{
++	struct pdata_init *quirks = pdata_quirks;
++
++	while (quirks->compatible) {
++		if (of_machine_is_compatible(quirks->compatible)) {
++			if (quirks->fn)
++				quirks->fn();
++			break;
++		}
++		quirks++;
++	}
++}
+-- 
+1.7.9.5
+

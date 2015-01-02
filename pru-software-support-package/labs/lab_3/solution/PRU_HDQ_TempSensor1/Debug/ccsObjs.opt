@@ -1,0 +1,1 @@
+"./temp_monitor_master_1.obj" "../link.cmd" -l"libc.a" 

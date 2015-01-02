@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+&am33xx_pinmux {
+	pru_cape_bone_pins: pru_cape_bone_pins {
+		pinctrl-single,pins = <
+			0x1a4 0x2e	/* mcasp0_fsr, OMAP_MUX_MODE6 | AM33XX_PIN_INPUT, PRU CAPE SW1 */
+			0x1ac 0x2e	/* mcasp0_ahclkx, OMAP_MUX_MODE6 | AM33XX_PIN_INPUT, PRU CAPE SW2 */
+			0x19c 0x05	/* mcasp0_ahclkr, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Red LED */
+			0x198 0x05	/* mcasp0_axr0, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Orange LED */
+			0x190 0x05	/* mcasp0_aclkx, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Blue LED */
+			0x194 0x05	/* mcasp0_fsx, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Green LED */
+			0x0ac 0x05	/* lcd_data3, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE RGB_0 LED, HDMI Conf. */
+			0x0b0 0x05	/* lcd_data4, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE RGB_1 LED, HDMI Conf. */
+			0x0b4 0x05	/* lcd_data5, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE RGB_2 LED, HDMI Conf. */
+			0x0a0 0x05	/* lcd_data0, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Data, HDMI Conf. */
+			0x0a4 0x05	/* lcd_data1, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Clk, HDMI Conf. */
+			0x0a8 0x05	/* lcd_data2, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE Audio Sync, HDMI Conf. */
+			0x184 0x05	/* uart1_txd, OMAP_MUX_MODE5 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART txd */
+			0x180 0x2d	/* uart1_rxd, OMAP_MUX_MODE5 | AM33XX_PIN_INPUT, PRU CAPE PRU UART rxd */
+			0x17c 0x04	/* spi0_d0, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE PRU UART rts */
+			0x150 0x2c	/* spi0_sclk, OMAP_MUX_MODE4 | AM33XX_PIN_INPUT, PRU CAPE PRU UART cts */
+			0x0b8 0x04	/* lcd_data6, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE LCD rs t3 */
+			0x0e8 0x04	/* lcd_pclk, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE LCD e v5 */
+			0x158 0x06	/* spi0_d1, OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT, PRU CAPE LCD data4 b16 */
+			0x15c 0x06	/* spi0_cs0, OMAP_MUX_MODE6 | AM33XX_PIN_OUTPUT, PRU CAPE LCD data5 a16 */
+			0x0e0 0x04	/* lcd_vsync, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE LCD data6 u5 */
+			0x0e4 0x04	/* lcd_hsync, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE LCD data7 r5 */
+			0x038 0x2e	/* gpmc_ad14, OMAP_MUX_MODE6 | AM33XX_PIN_INPUT, PRU CAPE Temp Input */
+			/*0x0bc 0x04*/	/* lcd_data7, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU CAPE Temp Output, Alpha Boards */
+			0x0ec 0x04	/* lcd_ac_bias_en, OMAP_MUX_MODE4 | AM33XX_PIN_OUTPUT, PRU Cape Temp Output */
+		>;
+	};
+};
+
+&lcdc {
+	status = "disabled";  		/* Disable HDMI due to pin mux conflicts with PRU Cape */
+};
+
+&pruss {
+        pinctrl-names = "default";
+	pinctrl-0 = <&pru_cape_bone_pins>;
+};

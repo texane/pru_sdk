@@ -1,0 +1,98 @@
+From 98a67f46428cc2fc0f5c2ad27c353b949e150e55 Mon Sep 17 00:00:00 2001
+From: Tony Lindgren <tony@atomide.com>
+Date: Thu, 10 Oct 2013 15:45:12 -0700
+Subject: [PATCH 06/21] ARM: OMAP2+: Add support for auxdata
+
+For few things we're still going to be needing platform
+data for device tree based drivers. Let's set up auxdata
+handling and do it in pdata-quirks.c so we have all the
+legacy calls in one place.
+
+[3.12 backport changes]
+ - Removed omap_pcs_legacy_init() addition from
+	  arch/arm/mach-omap2/common.
+ - Fixed minor sparse warning
+
+Reviewed-by: Kevin Hilman <khilman@linaro.org>
+Tested-by: Kevin Hilman <khilman@linaro.org>
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+[s-anna@ti.com: backport upstream commit 8651bd8 from v3.13]
+Signed-off-by: Suman Anna <s-anna@ti.com>
+
+Conflicts:
+	arch/arm/mach-omap2/board-generic.c
+	arch/arm/mach-omap2/pdata-quirks.c
+---
+ arch/arm/mach-omap2/board-generic.c |    5 +----
+ arch/arm/mach-omap2/common.h        |    2 +-
+ arch/arm/mach-omap2/pdata-quirks.c  |   11 ++++++++++-
+ 3 files changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/board-generic.c b/arch/arm/mach-omap2/board-generic.c
+index 07d923e..f8a790c 100644
+--- a/arch/arm/mach-omap2/board-generic.c
++++ b/arch/arm/mach-omap2/board-generic.c
+@@ -53,10 +53,7 @@ static void __init legacy_init_ehci_clk(char *clkname)
+ 
+ static void __init omap_generic_init(void)
+ {
+-	omap_sdrc_init(NULL, NULL);
+-
+-	of_platform_populate(NULL, omap_dt_match_table, NULL, NULL);
+-	pdata_quirks_init();
++	pdata_quirks_init(omap_dt_match_table);
+ 
+ 	/*
+ 	 * HACK: call display setup code for selected boards to enable omapdss.
+diff --git a/arch/arm/mach-omap2/common.h b/arch/arm/mach-omap2/common.h
+index 38131f6..9c44142 100644
+--- a/arch/arm/mach-omap2/common.h
++++ b/arch/arm/mach-omap2/common.h
+@@ -309,7 +309,7 @@ static inline void omap5_cpu_resume(void)
+ 
+ #endif
+ 
+-void pdata_quirks_init(void);
++void pdata_quirks_init(struct of_device_id *);
+ 
+ struct omap_sdrc_params;
+ extern void omap_sdrc_init(struct omap_sdrc_params *sdrc_cs0,
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index 20ba902..d2d2fdf 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -10,6 +10,7 @@
+ #include <linux/clk.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
++#include <linux/of_platform.h>
+ 
+ #include "common.h"
+ 
+@@ -18,14 +19,22 @@ struct pdata_init {
+ 	void (*fn)(void);
+ };
+ 
++static struct of_dev_auxdata omap_auxdata_lookup[] __initdata = {
++	{ /* sentinel */ },
++};
++
+ static struct pdata_init pdata_quirks[] __initdata = {
+ 	{ /* sentinel */ },
+ };
+ 
+-void __init pdata_quirks_init(void)
++void __init pdata_quirks_init(struct of_device_id *omap_dt_match_table)
+ {
+ 	struct pdata_init *quirks = pdata_quirks;
+ 
++	omap_sdrc_init(NULL, NULL);
++	of_platform_populate(NULL, omap_dt_match_table,
++			     omap_auxdata_lookup, NULL);
++
+ 	while (quirks->compatible) {
+ 		if (of_machine_is_compatible(quirks->compatible)) {
+ 			if (quirks->fn)
+-- 
+1.7.9.5
+

@@ -1,0 +1,28 @@
+From 1e66a6eedd0291323a730fb2eca9250ca32c21b8 Mon Sep 17 00:00:00 2001
+From: Dave Gerlach <d-gerlach@ti.com>
+Date: Wed, 26 Mar 2014 16:36:14 -0500
+Subject: [PATCH 21/21] ARM: OMAP2+: omap_hwmod: Change deassert hardreset for
+ AM43XX
+
+AM43XX reset register layout is more similar to am33xx than omap4 so
+use the am33xx functions for hwmod hardreset.
+---
+ arch/arm/mach-omap2/omap_hwmod.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-omap2/omap_hwmod.c b/arch/arm/mach-omap2/omap_hwmod.c
+index 3fe29a2..ca8a412 100644
+--- a/arch/arm/mach-omap2/omap_hwmod.c
++++ b/arch/arm/mach-omap2/omap_hwmod.c
+@@ -4322,7 +4322,7 @@ void __init omap_hwmod_init(void)
+ 		soc_ops.disable_module = _omap4_disable_module;
+ 		soc_ops.wait_target_ready = _omap4_wait_target_ready;
+ 		soc_ops.assert_hardreset = _omap4_assert_hardreset;
+-		soc_ops.deassert_hardreset = _omap4_deassert_hardreset;
++		soc_ops.deassert_hardreset = _am33xx_deassert_hardreset;
+ 		soc_ops.is_hardreset_asserted = _omap4_is_hardreset_asserted;
+ 		soc_ops.init_clkdm = _init_clkdm;
+ 		soc_ops.update_context_lost = _omap4_update_context_lost;
+-- 
+1.7.9.5
+

@@ -1,0 +1,1 @@
+"./button_led_0.obj" "../link.cmd" -l"libc.a" 

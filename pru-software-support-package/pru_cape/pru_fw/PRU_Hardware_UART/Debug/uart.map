@@ -1,0 +1,31 @@
+********************************************************************************
+PRU Hex Converter                                                         v2.1.0
+********************************************************************************
+
+INPUT FILE NAME: <PRU_Hardware_UART.out>
+OUTPUT FORMAT:   TI-TXT
+
+PHYSICAL MEMORY PARAMETERS
+   Default data width   :   8
+   Default memory width :   8
+   Default output width :   8
+
+
+OUTPUT TRANSLATION MAP
+--------------------------------------------------------------------------------
+00000000..00000fff  Page=0  Memory Width=8  ROM Width=8  "text"
+--------------------------------------------------------------------------------
+   OUTPUT FILES: UART_INST.bin [b0..b7]
+
+   CONTENTS: 00000000..00000013   PRU_Hardware_UART.out(.text:_c_int00*)
+             00000014..00000237   PRU_Hardware_UART.out(.text)
+             00000238..00000fff   FILL = 00000000
+
+--------------------------------------------------------------------------------
+00000000..00000fff  Page=1  Memory Width=8  ROM Width=8  "data"
+--------------------------------------------------------------------------------
+   OUTPUT FILES: UART_DATA.bin [b0..b7]
+
+   CONTENTS: 00000000..000000ff   FILL = 00000000
+             00000100..00000152   PRU_Hardware_UART.out(.rodata)
+             00000153..00000fff   FILL = 00000000

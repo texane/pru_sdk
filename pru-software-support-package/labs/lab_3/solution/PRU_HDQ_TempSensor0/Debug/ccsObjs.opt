@@ -1,0 +1,1 @@
+"./temp_monitor_slave_0.obj" "../link.cmd" -l"libc.a" 

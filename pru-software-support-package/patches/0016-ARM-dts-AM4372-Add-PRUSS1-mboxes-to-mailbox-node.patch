@@ -1,0 +1,37 @@
+From 623735e8c993a4935d146c0777fd1480d40710aa Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Wed, 4 Jun 2014 15:52:41 -0500
+Subject: [PATCH 16/21] ARM: dts: AM4372: Add PRUSS1 mboxes to mailbox node
+
+The mailbox DT node data is updated with additional mbox data to
+communicate with the PRU0 (User Id 1) and PRU1 (User Id 2) cores
+within the PRU-ICSS1 subsystem. The following are the assignments
+of mailbox fifos between MPU and the remote PRU cores:
+
+            MPU Tx/PRU Rx   MPU Rx/PRU Tx
+    PRU0    2               3
+    PRU1    4               5
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ arch/arm/boot/dts/am4372.dtsi |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/am4372.dtsi b/arch/arm/boot/dts/am4372.dtsi
+index bd4b22a..ca55909 100644
+--- a/arch/arm/boot/dts/am4372.dtsi
++++ b/arch/arm/boot/dts/am4372.dtsi
+@@ -138,8 +138,8 @@
+ 			ti,hwmods = "mailbox";
+ 			ti,mbox-num-users = <4>;
+ 			ti,mbox-num-fifos = <8>;
+-			ti,mbox-names = "wkup_m3";
+-			ti,mbox-data = <0 0 0 0>;
++			ti,mbox-names = "wkup_m3", "pru0", "pru1";
++			ti,mbox-data = <0 0 0 0>, <2 3 0 0>, <4 5 0 0>;
+ 		};
+ 
+ 		timer1: timer@44e31000 {
+-- 
+1.7.9.5
+

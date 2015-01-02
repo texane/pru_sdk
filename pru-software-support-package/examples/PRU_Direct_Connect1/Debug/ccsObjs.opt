@@ -1,0 +1,1 @@
+"./PRU1_Direct_Connect.obj" "../link.cmd" -l"libc.a" 

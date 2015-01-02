@@ -1,0 +1,1 @@
+"./PRU_ARMtoPRU_Interrupt.obj" "../link.cmd" -l"libc.a" 

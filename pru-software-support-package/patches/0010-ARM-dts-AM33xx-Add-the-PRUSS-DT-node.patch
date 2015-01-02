@@ -1,0 +1,65 @@
+From 3ac1a011cb745defa0b650c177865b931fe977b9 Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Thu, 15 May 2014 22:01:53 -0500
+Subject: [PATCH 10/21] ARM: dts: AM33xx: Add the PRUSS DT node
+
+Add the DT node for the PRU-ICSS on AM33xx family of SoCs.
+The DT node uses all standard properties. The regs property
+defines the addresses for various modules within the PRUSS,
+including all the Data RAMs, the Instruction RAM per core,
+the INTC, CFG, Debug and Control sub-modules.
+
+The two PRU cores within the PRUSS are represented as child
+nodes (so platform devices themselves) of the PRUSS parent
+node.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ arch/arm/boot/dts/am33xx.dtsi |   31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index 13091f6..895ed20 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -772,6 +772,37 @@
+ 			clock-names = "fck";
+ 		};
+ 
++		pruss: pruss@4a300000 {
++			compatible = "ti,am335x-pruss";
++			ti,hwmods = "pruss";
++			reg = <0x4a300000 0x2000>,
++			      <0x4a302000 0x2000>,
++			      <0x4a310000 0x3000>,
++			      <0x4a320000 0x2000>,
++			      <0x4a326000 0x2000>;
++			reg-names = "dram0", "dram1", "shrdram2", "intc", "cfg";
++			interrupts = <20 21 22 23 24 25 26 27>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++			ranges;
++
++			pru0: pru@4a334000 {
++				compatible = "ti,pru-rproc";
++				reg = <0x4a334000 0x2000>,
++				      <0x4a322000 0x400>,
++				      <0x4a322400 0x100>;
++				reg-names = "iram", "control", "debug";
++			};
++
++			pru1: pru@4a338000 {
++				compatible = "ti,pru-rproc";
++				reg = <0x4a338000 0x2000>,
++				      <0x4a324000 0x400>,
++				      <0x4a324400 0x100>;
++				reg-names = "iram", "control", "debug";
++			};
++		};
++
+ 		elm: elm@48080000 {
+ 			compatible = "ti,am3352-elm";
+ 			reg = <0x48080000 0x2000>;
+-- 
+1.7.9.5
+

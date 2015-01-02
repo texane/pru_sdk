@@ -1,0 +1,1 @@
+"./PRU_MAC_Multiply_Accum.obj" "../link.cmd" -l"libc.a" 

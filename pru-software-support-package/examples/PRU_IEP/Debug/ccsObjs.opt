@@ -1,0 +1,1 @@
+"./PRU_IEP.obj" "../link.cmd" -l"libc.a" 
