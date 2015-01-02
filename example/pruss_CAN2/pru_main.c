@@ -109,9 +109,6 @@ main (void)
   /* Enable the DCAN0 module clock */
   DCANModuleClkConfig ();
 
-  /* Perform the pinmux for DCAN0 */
-  DCANPinMuxSetUp ();
-
   /* Initialize the DCAN message RAM */
   DCANMsgRAMInit (1);
 
@@ -120,12 +117,6 @@ main (void)
 
   /* Select the console type based on compile time check */
   //  ConsoleUtilsSetType(CONSOLE_UART);
-
-  /* Enable the processor IRQ */
-  //   IntMasterIRQEnable();
-
-  /* Register the DCAN interrupts */
-  DCANAintcConfigure ();
 
   //  ConsoleUtilsPrintf("*** Waiting for data ***\n\n");
 
@@ -219,9 +210,9 @@ ConfigureDCAN (void)
   // set it to test mode:
   DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
   // internal loop-back
-  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
   // external loop-back
-  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
+  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
 
   /* Disable the write access to the DCAN configuration registers */
   DCANConfigRegWriteAccessControl (SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_DISABLE);
@@ -336,38 +327,4 @@ DCANIsr0 (void)
             }
         }
     }
-}
-
-/* Interrupt mapping to AINTC and registering CAN ISR */
-static void
-DCANAintcConfigure (void) {
-  //TODO
-  /* Set up the ARM interrupt controller */
-  //  IntAINTCInit();
-
-  /* Register the DCAN Interrupt handler for interrupt line 0*/
-  //   IntRegister(SYS_INT_DCAN0_INT0, DCANIsr0);
-
-  /* Assign priority to the interrupt */
-  //   IntPrioritySet(SYS_INT_DCAN0_INT0, 0, AINTC_HOSTINT_ROUTE_IRQ);
-
-  /* Enable the system interrupts in AINTC */
-  //  IntSystemEnable(SYS_INT_DCAN0_INT0);
-
-  /* Register the DCAN Interrupt handler for parity interrupt */
-  //   IntRegister(SYS_INT_DCAN0_PARITY, DCANParityIsr);
-
-  /* Assign priority to the interrupt */
-  //   IntPrioritySet(SYS_INT_DCAN0_PARITY, 0, AINTC_HOSTINT_ROUTE_IRQ);
-
-  /* Enable the system interrupts in AINTC */
-  //   IntSystemEnable(SYS_INT_DCAN0_PARITY);
-
-
-  // map host 0-7 to channel 0-7
-  // HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_HMR1_REG) = 0x03020100;
-  //  HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_HMR2_REG) = 0x07060504;
-
-  //map system event 40,41,42,43 to channel 0 
-  // HWREG(AM33XX_INTC_PHYS_BASE + PRU_INTC_CMR10_REG) = 0x00000000;
 }
