@@ -44,7 +44,7 @@
 #ifndef _UART_IRDA_CIR_H_
 #define _UART_IRDA_CIR_H_
 
-#include "hw_uart_irda_cir.h"
+#include "../include/hw/hw_uart_irda_cir.h"
 
 #ifdef __cplusplus
 extern "C" {

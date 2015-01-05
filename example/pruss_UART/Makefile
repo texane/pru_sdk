@@ -19,7 +19,7 @@ PRU_C_DIR=-I${PRU_CGT_DIR}/lib \
 
 DRIVER_DIR = ${AM335X_StarterWare_PATH}/drivers
 #SRC = $(wildcard ${DRIVER_DIR}/*.c) pru_main.c
-SRC = pru*.c
+SRC = pru*.c consoleUtils.c uart.c uart_irda_cir.c uartStdio.c uartConsole.c
 OUT = pru_main.elf
 CMD = ${PRU_CGT_DIR}/example/AM3359_PRU.cmd
 BUILD_DIR = build
