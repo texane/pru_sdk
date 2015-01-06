@@ -109,17 +109,17 @@ main (void)
   // HWREG(0x00012004) = 0;
   /* Configuring the system clocks for UART0 instance. */
   UART0ModuleClkConfig ();
-  shm_write_uint32 (REG_Len * 0, 0);
+
   /* Performing a module reset. */
   UARTModuleReset (UART_INSTANCE_BASE_ADD);
-  shm_write_uint32 (REG_Len * 0, 1);
+
   /* Performing FIFO configurations. */
   UartFIFOConfigure ();
-  shm_write_uint32 (REG_Len * 0, 2);
+
   UartConfigure (BAUD_RATE_115200, (UART_FRAME_WORD_LENGTH_8 |
                                     UART_FRAME_NUM_STB_1 |
                                     UART_PARITY_NONE));
-  shm_write_uint32 (REG_Len * 0, 3);
+
   /* Select the console type based on compile time check */
   ConsoleUtilsSetType (CONSOLE_UART);
 
@@ -129,7 +129,7 @@ main (void)
   while (1)
     {
       shm_write_uint32 (REG_Len * 0, i++);
-      shm_write_uint32 (REG_Len * 1, HWREG (SOC_DCAN_0_REGS));
+      shm_write_uint32 (REG_Len * 1, HWREG (SOC_UART_0_REGS));
 
     }
 }
