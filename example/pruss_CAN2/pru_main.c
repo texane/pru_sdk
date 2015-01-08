@@ -58,12 +58,11 @@
 #define CAN_TX_MSG_STD_ID                 (0x02u)
 
 #define REG_Len                 (4)
-#define MEM_SIZE                (16)
+#define MEM_SIZE                (20)
 
 /******************************************************************************
  **                       INTERNAL FUNCTION PROTOTYPES                     
  ******************************************************************************/
-static void DCANAintcConfigure (void);
 static void ConfigureDCAN (void);
 static void DCANIsr0 (void);
 
@@ -208,11 +207,11 @@ ConfigureDCAN (void)
   CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
 
   // set it to test mode:
-  DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
+  // DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
   // internal loop-back
-  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
   // external loop-back
-  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
+  //  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
 
   /* Disable the write access to the DCAN configuration registers */
   DCANConfigRegWriteAccessControl (SOC_DCAN_0_REGS, DCAN_CONF_REG_WR_ACCESS_DISABLE);
@@ -274,6 +273,7 @@ DCANIsr0 (void)
               tx_flag = 0;
             }
 
+          /* Interrupt handling for received objects */
           if ((msgNum >= (CAN_NUM_OF_MSG_OBJS / 2)) && (msgNum < CAN_NUM_OF_MSG_OBJS))
             {
               /* Read a received message from message RAM to interface register */
@@ -303,27 +303,18 @@ DCANIsr0 (void)
                        DCAN_DAT_LEN_CODE_READ);
               shm_write_uint32 (REG_Len * (11 + index), bytes);
 
-              //  shm_write_uint32 (REG_Len * (12), *canData);
-              // shm_write_uint32 (REG_Len * (13), *(canData + 1));
               /* Print the received data bytes on the UART console */
               for (index = 0; index < bytes; index++)
                 {
                   // ConsoleUtilsPrintf("%c", *dataPtr++);
 
                   // store char data in 32bits, so only low 1 Byte is used
-                  shm_write_uint32 (REG_Len * (14 + index), *(dataPtr++));
+                  shm_write_uint32 (REG_Len * (12 + index), *(dataPtr++));
                 }
 
               //     ConsoleUtilsPrintf("\r\n");
 
               //   isrFlag = 0;
-
-              /* Populate the can_frame structure with the CAN frame information */
-              //    entryRx.dlc = bytes;
-              //    entryRx.data = (unsigned int*) canData;
-
-              /* Configure a transmit message object */
-              //CANMsgObjectConfig(SOC_DCAN_0_REGS, &entry);
             }
         }
     }

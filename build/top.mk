@@ -1,5 +1,5 @@
 C_FILES := host_main.c ../common/mio.c
-DTS_FILES := pru_enable-00A0.dts
+DTS_FILES := pru_enable-00A0.dtsi
 C_FLAGS := -DSTART_ADDR=$(START_ADDR)
 
 PRU_SDK_DIR ?= $(shell pwd)/../..
@@ -20,7 +20,7 @@ L_LIBS += -lprussdrv
 
 BIN_FILES := $(P_FILES:.p=.bin)
 O_FILES := $(C_FILES:.c=.o)
-DTBO_FILES := $(DTS_FILES:.dts=.dtbo)
+DTBO_FILES := $(DTS_FILES:.dtsi=.dtbo)
 
 BUILD_DIR = build
 
@@ -37,7 +37,7 @@ main:	$(O_FILES)
 %.o : %.c
 	$(CC) $(C_FLAGS) -c -o $@ $<
 
-%.dtbo : %.dts
+%.dtbo : %.dtsi
 	$(DTC) -@ -O dtb -o $@ $<
 
 .PHONY	: clean all

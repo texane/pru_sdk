@@ -95,22 +95,3 @@ uint16_t adc_read(register uint32_t x, register uint32_t y, register uint32_t z)
 
     return 0;
 }
-
-
-/*
- * 
- * C14 DCAN0 0x481C_C000
- */
-void write_register_DCAN0(register uint32_t offset , register uint32_t x) {
-    /* base_addr is the absolute offset relative from shared memory start */
-    /* write x at DCAN_base_addr + offset */
-    
-    /* offset = r14
-     * x = r15
-     */
-    __asm__ __volatile__
-            (
-            " SBCO &r15, C14, r14.w0, 4 \n"
-            );
-    
-}
