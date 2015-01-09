@@ -65,6 +65,8 @@
  ******************************************************************************/
 static void ConfigureDCAN (void);
 static void DCANIsr0 (void);
+void set_gpio ();
+void clr_gpio ();
 
 /******************************************************************************
  **                       GLOBAL VARIABLE DEFINITIONS                   
@@ -79,7 +81,7 @@ static unsigned int canId_Tx = 2;
 static unsigned int bytes = 0;
 static unsigned int rx_count = 0;
 static unsigned int tx_count = 0;
-unsigned int tx_flag = 0;
+unsigned int tx_flag = 0; //indicate the transmit process has done
 can_frame entryRx;
 can_frame entryTx;
 
@@ -96,7 +98,7 @@ main (void)
 {
   unsigned int index = 0, i = 0;
   ocp_init ();
-  shm_init ();
+  shm_pru1_init ();
 
   for (i = 0; i < MEM_SIZE; i++)
     {
@@ -173,9 +175,9 @@ main (void)
       shm_write_uint32 (REG_Len * 5, DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG));
       shm_write_uint32 (REG_Len * 6, rx_count);
       shm_write_uint32 (REG_Len * 7, tx_count);
-      shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1)));
-      shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1)));
-
+      //  shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1))); can0 pin setting
+      //  shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1))); can0 pin setting
+      shm_write_uint32 (REG_Len * 8, HWREG (SOC_GPIO_1_REGS));
       DCANIsr0 ();
 
       entryTx.data[0] = i;
@@ -184,7 +186,10 @@ main (void)
           CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
         }
 
-      __delay_cycles (100000000);
+      set_gpio ();
+      __delay_cycles (10000000);
+      clr_gpio ();
+      __delay_cycles (10000000);
     }
 }
 
@@ -207,9 +212,9 @@ ConfigureDCAN (void)
   CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
 
   // set it to test mode:
-  // DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
+  DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
   // internal loop-back
-  // DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
   // external loop-back
   //  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
 
@@ -318,4 +323,24 @@ DCANIsr0 (void)
             }
         }
     }
+}
+
+/* set the GPIO */
+void
+set_gpio (void)
+{
+  __asm__ __volatile__
+          (
+           " SET r30,r30, 12 \n"
+           );
+}
+
+/* clear the GPIO */
+void
+clr_gpio (void)
+{
+  __asm__ __volatile__
+          (
+           " CLR r30,r30, 12 \n"
+           );
 }

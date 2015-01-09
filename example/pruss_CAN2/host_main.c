@@ -8,6 +8,7 @@
 #include "../common/mio.h"
 
 #define MEM_SIZE 20
+#define PRU_NUM 1
 
 /* host pru shared memory */
 
@@ -78,8 +79,6 @@ main (int ac, char** av)
   prussdrv_pruintc_init (&pruss_intc_initdata);
 
   /* zero_words(n); */
-
-#define PRU_NUM 0
 
   /* write data from data.bin */
   prussdrv_load_datafile (PRU_NUM, "./data.bin");
