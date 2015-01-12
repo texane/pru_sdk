@@ -11,7 +11,7 @@
 #define PRU_NUM 1
 
 /* host pru shared memory */
-
+/*
 static void
 zero_words (size_t n)
 {
@@ -29,7 +29,7 @@ zero_words (size_t n)
 
   mio_close (&mio);
 }
-
+*/
 static int
 read_words (uint32_t* x, size_t n)
 {
@@ -96,7 +96,7 @@ main (int ac, char** av)
       for (i = 0; i != n; ++i)
         {
           //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
-          printf ("mem %d %08x: (%08x)\n", i, (x + i), *(unsigned long*) (x + i));
+          printf ("mem %d %08x: (%08x)\n", i, (x + i), (unsigned int) (*(x + i)));
         }
       printf ("\n");
     }

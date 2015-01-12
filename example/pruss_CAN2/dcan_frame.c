@@ -28,9 +28,10 @@
 #include "dcan_frame.h"
 #include "../../include/include/hw/hw_dcan.h"
 #include "dcan.h"
+#include "pru_main.h"
 
-#define DCAN_ID_MASK           (0x0u)
-extern unsigned int tx_flag ;
+extern unsigned int isr_tx_flag;
+extern unsigned int isr_rx_flag;
 
 /**
  * \brief   This function will configure a message object in the DCAN message 
@@ -41,15 +42,23 @@ extern unsigned int tx_flag ;
  * \param   canPtr        Pointer to can_frame structure.
  *
  **/
-void CANMsgObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
-    if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_TX)) {
-        /* Configure a transmit message object */
-        CANTxObjectConfig(baseAdd, canPtr);
-        tx_flag = 1;
-    } else if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_RX)) {
-        /* Configure a receive message object */
-        CANRxObjectConfig(baseAdd, canPtr);
-    } else {
+void
+CANMsgObjectConfig (unsigned int baseAdd, can_frame* canPtr)
+{
+  if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_TX))
+    {
+      /* Configure a transmit message object */
+      CANTxObjectConfig (baseAdd, canPtr);
+      isr_tx_flag = 1;
+    }
+  else if ((canPtr->flag & CAN_DATA_FRAME) && (canPtr->flag & CAN_MSG_DIR_RX))
+    {
+      /* Configure a receive message object */
+      CANRxObjectConfig (baseAdd, canPtr);
+      isr_rx_flag = 1;
+    }
+  else
+    {
 
     }
 }
@@ -62,40 +71,42 @@ void CANMsgObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
  * \param   canPtr        Pointer to can_frame structure.
  *
  **/
-void CANTxObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
-    unsigned int msgNum;
-    unsigned int idLen;
+void
+CANTxObjectConfig (unsigned int baseAdd, can_frame* canPtr)
+{
+  unsigned int msgNum;
+  unsigned int idLen;
 
-    idLen = (canPtr->flag & CAN_EXT_FRAME) ? DCAN_29_BIT_ID : DCAN_11_BIT_ID;
+  idLen = (canPtr->flag & CAN_EXT_FRAME) ? DCAN_29_BIT_ID : DCAN_11_BIT_ID;
 
-    /* Set the message valid bit */
-    DCANMsgObjValidate(baseAdd, DCAN_IF1_REG);
+  /* Set the message valid bit */
+  DCANMsgObjValidate (baseAdd, DCAN_IF1_REG);
 
-    /* Set the message id of the frame to be transmitted */
-    DCANMsgIdSet(baseAdd, canPtr->id, idLen, DCAN_IF1_REG);
+  /* Set the message id of the frame to be transmitted */
+  DCANMsgIdSet (baseAdd, canPtr->id, idLen, DCAN_IF1_REG);
 
-    /* Set the message object direction as transmit */
-    DCANMsgDirectionSet(baseAdd, DCAN_TX_DIR, DCAN_IF1_REG);
+  /* Set the message object direction as transmit */
+  DCANMsgDirectionSet (baseAdd, DCAN_TX_DIR, DCAN_IF1_REG);
 
-    /* Set the data length code */
-    DCANDataLengthCodeSet(baseAdd, canPtr->dlc, DCAN_IF1_REG);
+  /* Set the data length code */
+  DCANDataLengthCodeSet (baseAdd, canPtr->dlc, DCAN_IF1_REG);
 
-    /* Write data to the DCAN data registers */
-    DCANDataWrite(baseAdd, (canPtr->data), DCAN_IF1_REG);
+  /* Write data to the DCAN data registers */
+  DCANDataWrite (baseAdd, (canPtr->data), DCAN_IF1_REG);
 
-    /* Enable the transmit interrupt for the message object */
-    DCANMsgObjIntEnable(baseAdd, DCAN_TRANSMIT_INT, DCAN_IF1_REG);
+  /* Enable the transmit interrupt for the message object */
+  DCANMsgObjIntEnable (baseAdd, DCAN_TRANSMIT_INT, DCAN_IF1_REG);
 
-    /* Enable the DCAN FIFO End of block */
-    DCANFIFOEndOfBlockControl(baseAdd, DCAN_END_OF_BLOCK_ENABLE, DCAN_IF1_REG);
+  /* Enable the DCAN FIFO End of block */
+  DCANFIFOEndOfBlockControl (baseAdd, DCAN_END_OF_BLOCK_ENABLE, DCAN_IF1_REG);
 
-    /* Get the transmit request status */
-    msgNum = DCANTxRqstStatGet(baseAdd);
+  /* Get the transmit request status */
+  msgNum = DCANTxRqstStatGet (baseAdd);
 
-    /* Configure the command register */
-    DCANCommandRegSet(baseAdd, (DCAN_DAT_A_ACCESS | DCAN_MSG_WRITE | DCAN_TXRQST_ACCESS |
-            DCAN_DAT_B_ACCESS | DCAN_ACCESS_CTL_BITS |
-            DCAN_ACCESS_ARB_BITS), msgNum, DCAN_IF1_REG);
+  /* Configure the command register */
+  DCANCommandRegSet (baseAdd, (DCAN_DAT_A_ACCESS | DCAN_MSG_WRITE | DCAN_TXRQST_ACCESS |
+                               DCAN_DAT_B_ACCESS | DCAN_ACCESS_CTL_BITS |
+                               DCAN_ACCESS_ARB_BITS), msgNum, DCAN_IF1_REG);
 }
 
 /**
@@ -106,47 +117,50 @@ void CANTxObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
  * \param   canPtr        Pointer to can_frame structure.
  *
  **/
-void CANRxObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
-    unsigned int idLen;
-    unsigned int msgIndex;
+void
+CANRxObjectConfig (unsigned int baseAdd, can_frame* canPtr)
+{
+  unsigned int idLen;
+  unsigned int msgIndex;
 
-    msgIndex = (CAN_NUM_OF_MSG_OBJS / 2);
+  msgIndex = (CAN_NUM_OF_MSG_OBJS / 2);
 
-    idLen = (canPtr->flag & CAN_EXT_FRAME) ? DCAN_29_BIT_ID : DCAN_11_BIT_ID;
+  idLen = (canPtr->flag & CAN_EXT_FRAME) ? DCAN_29_BIT_ID : DCAN_11_BIT_ID;
 
-    /* Use Acceptance mask. */
-    DCANUseAcceptanceMaskControl(baseAdd, DCAN_MASK_USED, DCAN_IF2_REG);
+  /* Use Acceptance mask. */
+  DCANUseAcceptanceMaskControl (baseAdd, DCAN_MASK_USED, DCAN_IF2_REG);
 
-    /* Configure the DCAN mask registers for acceptance filtering. */
-    DCANMsgObjectMskConfig(baseAdd, DCAN_IDENTIFIER_MSK(DCAN_ID_MASK,
-            DCAN_ID_MSK_11_BIT), DCAN_MSK_MSGDIR_DISABLE,
-            DCAN_MSK_EXT_ID_ENABLE, DCAN_IF2_REG);
+  /* Configure the DCAN mask registers for acceptance filtering. */
+  DCANMsgObjectMskConfig (baseAdd, DCAN_IDENTIFIER_MSK (DCAN_ID_MASK,
+                                                        DCAN_ID_MSK_11_BIT), DCAN_MSK_MSGDIR_DISABLE,
+                          DCAN_MSK_EXT_ID_ENABLE, DCAN_IF2_REG);
 
-    /* Set the message valid bit */
-    DCANMsgObjValidate(baseAdd, DCAN_IF2_REG);
+  /* Set the message valid bit */
+  DCANMsgObjValidate (baseAdd, DCAN_IF2_REG);
 
-    /* Set the message id of the frame to be received */
-    DCANMsgIdSet(baseAdd, canPtr->id, idLen, DCAN_IF2_REG);
+  /* Set the message id of the frame to be received */
+  DCANMsgIdSet (baseAdd, canPtr->id, idLen, DCAN_IF2_REG);
 
-    /* Set the message object direction as receive */
-    DCANMsgDirectionSet(baseAdd, DCAN_RX_DIR, DCAN_IF2_REG);
+  /* Set the message object direction as receive */
+  DCANMsgDirectionSet (baseAdd, DCAN_RX_DIR, DCAN_IF2_REG);
 
-    /* Enable the receive interrupt for the message object */
-    DCANMsgObjIntEnable(baseAdd, DCAN_RECEIVE_INT, DCAN_IF2_REG);
+  /* Enable the receive interrupt for the message object */
+  DCANMsgObjIntEnable (baseAdd, DCAN_RECEIVE_INT, DCAN_IF2_REG);
 
-    /* Enable the FIFO end of block */
-    DCANFIFOEndOfBlockControl(baseAdd, DCAN_END_OF_BLOCK_ENABLE, DCAN_IF2_REG);
+  /* Enable the FIFO end of block */
+  DCANFIFOEndOfBlockControl (baseAdd, DCAN_END_OF_BLOCK_ENABLE, DCAN_IF2_REG);
 
-    /* Check for the message valid status for receive objects */
-    while ((DCANMsgValidStatusGet(baseAdd, msgIndex)) &&
-            (msgIndex <= (CAN_NUM_OF_MSG_OBJS - 1))) {
-        msgIndex++;
+  /* Check for the message valid status for receive objects */
+  while ((DCANMsgValidStatusGet (baseAdd, msgIndex)) &&
+         (msgIndex <= (CAN_NUM_OF_MSG_OBJS - 1)))
+    {
+      msgIndex++;
     }
 
-    /* Configure the command register */
-    DCANCommandRegSet(baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE |
-            DCAN_ACCESS_MSK_BITS | DCAN_ACCESS_ARB_BITS),
-            msgIndex, DCAN_IF2_REG);
+  /* Configure the command register */
+  DCANCommandRegSet (baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE |
+                               DCAN_ACCESS_MSK_BITS | DCAN_ACCESS_ARB_BITS),
+                     msgIndex, DCAN_IF2_REG);
 }
 
 /**
@@ -159,20 +173,22 @@ void CANRxObjectConfig(unsigned int baseAdd, can_frame* canPtr) {
  * \param   ifReg         Interface register set used.
  *
  */
-void CANReadMsgObjData(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int* data, unsigned int ifReg) {
-    /* Read a message object from CAN message RAM to Interface register */
-    DCANCommandRegSet(baseAdd, (DCAN_DAT_A_ACCESS | DCAN_DAT_B_ACCESS |
-            DCAN_TXRQST_ACCESS | DCAN_CLR_INTPND |
-            DCAN_ACCESS_CTL_BITS | DCAN_ACCESS_ARB_BITS |
-            DCAN_ACCESS_MSK_BITS | DCAN_MSG_READ),
-            msgNum, ifReg);
+void
+CANReadMsgObjData (unsigned int baseAdd, unsigned int msgNum,
+                   unsigned int* data, unsigned int ifReg)
+{
+  /* Read a message object from CAN message RAM to Interface register */
+  DCANCommandRegSet (baseAdd, (DCAN_DAT_A_ACCESS | DCAN_DAT_B_ACCESS |
+                               DCAN_TXRQST_ACCESS | DCAN_CLR_INTPND |
+                               DCAN_ACCESS_CTL_BITS | DCAN_ACCESS_ARB_BITS |
+                               DCAN_ACCESS_MSK_BITS | DCAN_MSG_READ),
+                     msgNum, ifReg);
 
-    /* Clear the NewData bit */
-    DCANNewDataControl(baseAdd, DCAN_NEW_DAT_CLR, ifReg);
+  /* Clear the NewData bit */
+  DCANNewDataControl (baseAdd, DCAN_NEW_DAT_CLR, ifReg);
 
-    /* Read data bytes from interface register */
-    DCANDataRead(baseAdd, data, ifReg);
+  /* Read data bytes from interface register */
+  DCANDataRead (baseAdd, data, ifReg);
 }
 
 /**
@@ -185,13 +201,15 @@ void CANReadMsgObjData(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANClrIntPndStat(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int ifReg) {
-    /* Clear the IntPnd bit of DCAN_IFMCTL register */
-    DCANClrIntPnd(baseAdd, ifReg);
+void
+CANClrIntPndStat (unsigned int baseAdd, unsigned int msgNum,
+                  unsigned int ifReg)
+{
+  /* Clear the IntPnd bit of DCAN_IFMCTL register */
+  DCANClrIntPnd (baseAdd, ifReg);
 
-    /* Set the ClrIntPnd bit of DCAN_IFCMD register */
-    DCANCommandRegSet(baseAdd, DCAN_CLR_INTPND, msgNum, ifReg);
+  /* Set the ClrIntPnd bit of DCAN_IFCMD register */
+  DCANCommandRegSet (baseAdd, DCAN_CLR_INTPND, msgNum, ifReg);
 }
 
 /**
@@ -202,14 +220,16 @@ void CANClrIntPndStat(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANValidateMsgObject(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int ifReg) {
-    /* Set the MsgVal bit of DCAN_IFARB register */
-    DCANMsgObjValidate(baseAdd, ifReg);
+void
+CANValidateMsgObject (unsigned int baseAdd, unsigned int msgNum,
+                      unsigned int ifReg)
+{
+  /* Set the MsgVal bit of DCAN_IFARB register */
+  DCANMsgObjValidate (baseAdd, ifReg);
 
-    /* Set the Arb bit of DCAN_IFCMD register */
-    DCANCommandRegSet(baseAdd, (DCAN_ACCESS_ARB_BITS | DCAN_MSG_WRITE),
-            msgNum, ifReg);
+  /* Set the Arb bit of DCAN_IFCMD register */
+  DCANCommandRegSet (baseAdd, (DCAN_ACCESS_ARB_BITS | DCAN_MSG_WRITE),
+                     msgNum, ifReg);
 }
 
 /**
@@ -221,14 +241,16 @@ void CANValidateMsgObject(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANInValidateMsgObject(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int ifReg) {
-    /* Clear the MsgVal bit of DCAN_IFARB register */
-    DCANMsgObjInvalidate(baseAdd, ifReg);
+void
+CANInValidateMsgObject (unsigned int baseAdd, unsigned int msgNum,
+                        unsigned int ifReg)
+{
+  /* Clear the MsgVal bit of DCAN_IFARB register */
+  DCANMsgObjInvalidate (baseAdd, ifReg);
 
-    /* Set the Arb bit of DCAN_IFCMD register */
-    DCANCommandRegSet(baseAdd, (DCAN_ACCESS_ARB_BITS | DCAN_MSG_WRITE),
-            msgNum, ifReg);
+  /* Set the Arb bit of DCAN_IFCMD register */
+  DCANCommandRegSet (baseAdd, (DCAN_ACCESS_ARB_BITS | DCAN_MSG_WRITE),
+                     msgNum, ifReg);
 }
 
 /**
@@ -240,14 +262,16 @@ void CANInValidateMsgObject(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANTxIntDisable(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int ifReg) {
-    /* Disable the message object transmit interrupt */
-    DCANMsgObjIntDisable(baseAdd, DCAN_TRANSMIT_INT, ifReg);
+void
+CANTxIntDisable (unsigned int baseAdd, unsigned int msgNum,
+                 unsigned int ifReg)
+{
+  /* Disable the message object transmit interrupt */
+  DCANMsgObjIntDisable (baseAdd, DCAN_TRANSMIT_INT, ifReg);
 
-    /* Set the CTL bit of the command register */
-    DCANCommandRegSet(baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE),
-            msgNum, ifReg);
+  /* Set the CTL bit of the command register */
+  DCANCommandRegSet (baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE),
+                     msgNum, ifReg);
 }
 
 /**
@@ -259,14 +283,16 @@ void CANTxIntDisable(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANRxIntDisable(unsigned int baseAdd, unsigned int msgNum,
-        unsigned int ifReg) {
-    /* Disable the message object receive interrupt */
-    DCANMsgObjIntDisable(baseAdd, DCAN_RECEIVE_INT, ifReg);
+void
+CANRxIntDisable (unsigned int baseAdd, unsigned int msgNum,
+                 unsigned int ifReg)
+{
+  /* Disable the message object receive interrupt */
+  DCANMsgObjIntDisable (baseAdd, DCAN_RECEIVE_INT, ifReg);
 
-    /* Set the CTL bit of the command register */
-    DCANCommandRegSet(baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE),
-            msgNum, ifReg);
+  /* Set the CTL bit of the command register */
+  DCANCommandRegSet (baseAdd, (DCAN_ACCESS_CTL_BITS | DCAN_MSG_WRITE),
+                     msgNum, ifReg);
 }
 
 /**
@@ -280,15 +306,17 @@ void CANRxIntDisable(unsigned int baseAdd, unsigned int msgNum,
  * \param   ifReg         Interface register set used.
  *
  **/
-void CANUpdateDataBytes(unsigned int baseAdd, unsigned int* dataPtr,
-        unsigned int msgNum, unsigned int ifReg) {
-    /* Populate the data bytes in the data registers */
-    DCANDataWrite(baseAdd, dataPtr, ifReg);
+void
+CANUpdateDataBytes (unsigned int baseAdd, unsigned int* dataPtr,
+                    unsigned int msgNum, unsigned int ifReg)
+{
+  /* Populate the data bytes in the data registers */
+  DCANDataWrite (baseAdd, dataPtr, ifReg);
 
-    /* Set the DataA, DataB, TxRqst and WR of the IF_CMD register */
-    DCANCommandRegSet(baseAdd, (DCAN_DAT_A_ACCESS | DCAN_DAT_B_ACCESS |
-            DCAN_TXRQST_ACCESS | DCAN_MSG_WRITE),
-            msgNum, ifReg);
+  /* Set the DataA, DataB, TxRqst and WR of the IF_CMD register */
+  DCANCommandRegSet (baseAdd, (DCAN_DAT_A_ACCESS | DCAN_DAT_B_ACCESS |
+                               DCAN_TXRQST_ACCESS | DCAN_MSG_WRITE),
+                     msgNum, ifReg);
 }
 
 /**
@@ -304,13 +332,15 @@ void CANUpdateDataBytes(unsigned int baseAdd, unsigned int* dataPtr,
  *
  **/
 
-unsigned int CANSetBitTiming(unsigned int baseAdd, unsigned int clkFreq,
-        unsigned int bitRate) {
-    unsigned int errVal = 0;
+unsigned int
+CANSetBitTiming (unsigned int baseAdd, unsigned int clkFreq,
+                 unsigned int bitRate)
+{
+  unsigned int errVal = 0;
 
 
-    /* Set the BTR value to the DCAN bittiming register */
-    DCANBitTimingConfig(baseAdd, 9985u);
+  /* Set the BTR value to the DCAN bittiming register */
+  DCANBitTimingConfig (baseAdd, 9985u);
 
-    return errVal;
+  return errVal;
 }

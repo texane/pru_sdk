@@ -46,19 +46,11 @@
 #include "dcan.h"
 #include "pru_hal.h"
 #include "dcan_frame.h"
+#include "pru_main.h"
 
 /******************************************************************************
  **                       INTERNAL MACRO DEFINITIONS
  ******************************************************************************/
-#define DCAN_NO_INT_PENDING               (0x00000000u)
-#define DCAN_IN_CLK                       (24000000u)
-#define DCAN_ERROR_OCCURED                (0x8000u)
-#define DCAN_BIT_RATE                     (1000000u)
-#define CAN_TX_MSG_EXTD_ID                (0x1000u)
-#define CAN_TX_MSG_STD_ID                 (0x02u)
-
-#define REG_Len                 (4)
-#define MEM_SIZE                (20)
 
 /******************************************************************************
  **                       INTERNAL FUNCTION PROTOTYPES                     
@@ -73,15 +65,12 @@ void clr_gpio ();
  ******************************************************************************/
 /* CAN frame details */
 static unsigned int rxflag = (CAN_DATA_FRAME | CAN_MSG_DIR_RX);
-static volatile unsigned int isrRxFlag = 1;
-static volatile unsigned int isrFlag = 1;
-static unsigned int canData[2];
-static unsigned int canId = 2;
-static unsigned int canId_Tx = 2;
+static unsigned int canData[8];
 static unsigned int bytes = 0;
 static unsigned int rx_count = 0;
 static unsigned int tx_count = 0;
-unsigned int tx_flag = 0; //indicate the transmit process has done
+unsigned int isr_tx_flag = 0; //indicate the transmit process has done
+unsigned int isr_rx_flag = 0; //indicate the receive process has done
 can_frame entryRx;
 can_frame entryTx;
 
@@ -133,7 +122,7 @@ main (void)
       CANInValidateMsgObject (SOC_DCAN_0_REGS, index, DCAN_IF2_REG);
     }
   entryRx.flag = rxflag;
-  entryRx.id = canId;
+  entryRx.id = CAN_RX_MSG_STD_ID;
 
   /* 
    ** Configure a receive message object to accept CAN 
@@ -142,7 +131,7 @@ main (void)
   CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryRx);
 
   entryTx.flag = (CAN_MSG_DIR_TX | CAN_DATA_FRAME);
-  entryTx.id = canId_Tx;
+  entryTx.id = CAN_TX_MSG_STD_ID;
   // entryTx.dlc = sizeof (data_Tx) / sizeof (data_Tx[0]);
   entryTx.dlc = 5; // this is the number count by char(1 Byte)
   entryTx.data = data_Tx;
@@ -175,21 +164,21 @@ main (void)
       shm_write_uint32 (REG_Len * 5, DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG));
       shm_write_uint32 (REG_Len * 6, rx_count);
       shm_write_uint32 (REG_Len * 7, tx_count);
-      //  shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1))); can0 pin setting
-      //  shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1))); can0 pin setting
-      shm_write_uint32 (REG_Len * 8, HWREG (SOC_GPIO_1_REGS));
+      //   shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1))); // can0 pin setting
+      //  shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1))); // can0 pin setting
+      //  shm_write_uint32 (REG_Len * 8, HWREG (SOC_GPIO_1_REGS));
       DCANIsr0 ();
 
       entryTx.data[0] = i;
-      if (tx_flag == 0)
+      if (isr_tx_flag == 0)
         {
           CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
         }
 
       set_gpio ();
-      __delay_cycles (10000000);
+      __delay_cycles (100000000);
       clr_gpio ();
-      __delay_cycles (10000000);
+      __delay_cycles (100000000);
     }
 }
 
@@ -212,9 +201,9 @@ ConfigureDCAN (void)
   CANSetBitTiming (SOC_DCAN_0_REGS, DCAN_IN_CLK, DCAN_BIT_RATE);
 
   // set it to test mode:
-  DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
+  //  DCANTestModeControl (SOC_DCAN_0_REGS, DCAN_TEST_MODE_ENABLE);
   // internal loop-back
-  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
+  //  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_LPBCK_MD);
   // external loop-back
   //  DCANTestModesEnable (SOC_DCAN_0_REGS, DCAN_TST_EXTLPBCK_MD);
 
@@ -275,7 +264,7 @@ DCANIsr0 (void)
               /* Clear the Interrupt pending status */
               CANClrIntPndStat (SOC_DCAN_0_REGS, msgNum, DCAN_IF2_REG);
               tx_count++;
-              tx_flag = 0;
+              isr_tx_flag = 0;
             }
 
           /* Interrupt handling for received objects */
@@ -285,6 +274,8 @@ DCANIsr0 (void)
               CANReadMsgObjData (SOC_DCAN_0_REGS, msgNum, (unsigned int*) canData,
                                  DCAN_IF2_REG);
               rx_count++;
+              isr_rx_flag = 0;
+
               if ((DCANIFArbStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG) &
                    DCAN_EXT_ID_READ) == DCAN_29_BIT_ID)
                 {
@@ -331,7 +322,7 @@ set_gpio (void)
 {
   __asm__ __volatile__
           (
-           " SET r30,r30, 12 \n"
+           " SET r30,r30, 12 \n" //P8.21
            );
 }
 
