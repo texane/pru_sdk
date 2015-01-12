@@ -73,6 +73,7 @@ unsigned int isr_tx_flag = 0; //indicate the transmit process has done
 unsigned int isr_rx_flag = 0; //indicate the receive process has done
 can_frame entryRx;
 can_frame entryTx;
+int got = 0;
 
 //0x87654321 0x90
 //the data to be sent need to be two 32bits variables
@@ -167,18 +168,28 @@ main (void)
       //   shm_write_uint32 (REG_Len * 8, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_CTSN (1))); // can0 pin setting
       //  shm_write_uint32 (REG_Len * 9, HWREG (SOC_CONTROL_REGS + CONTROL_CONF_UART_RTSN (1))); // can0 pin setting
       //  shm_write_uint32 (REG_Len * 8, HWREG (SOC_GPIO_1_REGS));
+
+      // *****   server part****
+      //   __delay_cycles (100000000);
+      //     got = 0;
+      //     set_gpio ();
+
+      //     entryTx.data[0] = i++;
+      //      if (isr_tx_flag == 0)
+      //        {
+      //          CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
+      //        }
+
+      //      while (got == 0)
+      //        {
+      //  DCANIsr0 ();
+      //        }
+      //****************
+
+
+      //******* client part*******
       DCANIsr0 ();
-
-      entryTx.data[0] = i;
-      if (isr_tx_flag == 0)
-        {
-          CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
-        }
-
-      set_gpio ();
-      __delay_cycles (100000000);
-      clr_gpio ();
-      __delay_cycles (100000000);
+      //**************
     }
 }
 
@@ -297,17 +308,31 @@ DCANIsr0 (void)
 
               bytes = (DCANIFMsgCtlStatusGet (SOC_DCAN_0_REGS, DCAN_IF2_REG) &
                        DCAN_DAT_LEN_CODE_READ);
-              shm_write_uint32 (REG_Len * (11 + index), bytes);
+              //  shm_write_uint32 (REG_Len * (11 + index), bytes);
 
               /* Print the received data bytes on the UART console */
-              for (index = 0; index < bytes; index++)
+              //  for (index = 0; index < bytes; index++)
+              //    {
+              // ConsoleUtilsPrintf("%c", *dataPtr++);
+
+              // store char data in 32bits, so only low 1 Byte is used
+              //      shm_write_uint32 (REG_Len * (12 + index), *(dataPtr++));
+              //     }
+
+              //*******server part*******
+              //    clr_gpio ();
+              //   got = 1;
+              //**************
+
+              //*******client part*******
+              int i = 100;
+              while (i--);
+              if (isr_tx_flag == 0)
                 {
-                  // ConsoleUtilsPrintf("%c", *dataPtr++);
-
-                  // store char data in 32bits, so only low 1 Byte is used
-                  shm_write_uint32 (REG_Len * (12 + index), *(dataPtr++));
+                  entryTx.data[0] = canData[0] + 1;
+                  CANMsgObjectConfig (SOC_DCAN_0_REGS, &entryTx);
                 }
-
+              //**************
               //     ConsoleUtilsPrintf("\r\n");
 
               //   isrFlag = 0;
