@@ -28,9 +28,10 @@ LBCO r0, CONST_PRUCFG, 4, 4
 CLR r0, r0, 4
 SBCO r0, CONST_PRUCFG, 4, 4
 
-// MOV r2, 1<<13
-// MOV r3, GPIO1 | GPIO_SETDATAOUT
-// SBBO r2, r3, 0, 4
+//
+// r4 is the xor mask
+// r5 is the working value
+
 MOV r4, 1 << 15
 MOV r5, 0
 
