@@ -20,15 +20,16 @@
 
 /* host pru shared memory */
 
-static int read_words(uint32_t x[2])
+static int write_frequency(uint32_t x)
 {
-  static const size_t sharedram_offset = 2048;
-  volatile uint32_t* p;
+  mio_handle_t mio;
 
-  prussdrv_map_prumem(4, (void**)&p);
+  if (mio_open(&mio, 0x80001000, 0x1000)) return -1;
 
-  x[0] = p[sharedram_offset + 0];
-  x[1] = p[sharedram_offset + 1];
+  mio_write_uint32(&mio, 0, x);
+  /* mio_write_uint32(&mio, 4, y); */
+
+  mio_close(&mio);
 
   return 0;
 }
@@ -49,7 +50,7 @@ static void on_sigint(int x)
 int main(int ac, char** av)
 {
   tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
-  uint32_t x[2];
+  uint32_t freq;
 
   prussdrv_init();
 
@@ -61,17 +62,19 @@ int main(int ac, char** av)
 
   prussdrv_pruintc_init(&pruss_intc_initdata);
 
+  /* wave frequency */
+  /* 1 second = 200000000 */
+  /* default to 1 millisecond */
+  freq = 200000;
+  if (ac > 1) freq = (uint32_t)strtoul(av[1], NULL, 10);
+  write_frequency(freq);
+
   /* execute code on pru0 */
 #define PRU_NUM 0
   prussdrv_exec_program(PRU_NUM, "./spwm.bin");
 
   signal(SIGINT, on_sigint);
-  while (is_sigint == 0)
-  {
-    usleep(500000);
-    read_words(x);
-    printf("0x%08x, 0x%08x\n", x[0], x[1]);
-  }
+  while (is_sigint == 0) usleep(1000000);
 
   /* disable pru and close memory mapping */
   prussdrv_pru_disable(PRU_NUM);

@@ -55,8 +55,18 @@ SBCO r0, CONST_IEP, IEP_REG_COUNT, 4
 MOV r0, (1 << 1) | (1 << 0)
 SBCO r0, CONST_IEP, IEP_REG_CMP_CFG, 4
 
-// timer comparison value. 200000000 is 1 second.
-MOV r0, 200000000
+// timer comparison value
+// retrieve from shared memory (ie. ddr)
+
+MOV r0, 0x000000120
+MOV r1, CTPPR_0
+ST32 r0, r1
+
+MOV r0, 0x00100000
+MOV r1, CTPPR_1
+ST32 r0, r1
+
+LBCO r0, CONST_DDR, 0, 4
 SBCO r0, CONST_IEP, IEP_REG_CMP0, 4
 
 
