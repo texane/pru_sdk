@@ -5,7 +5,7 @@
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
 
 	/* identification */
-	part-number = "pruss_enable";
+	part-number = "pru_enable";
 	version = "00A0";
 
  	fragment@0 {
