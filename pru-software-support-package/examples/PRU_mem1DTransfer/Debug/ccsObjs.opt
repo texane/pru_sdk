@@ -1,0 +1,1 @@
+"./PRU_mem1DTransfer.obj" "../link.cmd" -l"libc.a" 

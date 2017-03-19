@@ -1,0 +1,126 @@
+From 8d5de3fe8fcf7086209406b66d727facdc815604 Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Mon, 19 May 2014 17:21:12 -0500
+Subject: [PATCH 04/21] remoteproc/core: add a rproc ops for performing
+ address translation
+
+The rproc_da_to_va API is currently used to perform any device to
+kernel address translations to meet the different needs of the remoteproc
+core/drivers (eg: loading). The functionality is achieved within the
+remoteproc core, and is limited only for carveouts allocated within the
+core or to internal memories published through the resource table.
+
+A new rproc ops, da_to_va, is added to provide flexibility to platform
+implementations to perform the address translation themselves when the
+above conditions cannot be met by the implementations. The rproc_da_to_va()
+is expanded to take in an additional flags field and invoke this ops if
+present, and fallback to regular processing if the platform implementation
+cannot provide the translation.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ drivers/remoteproc/remoteproc_core.c       |   11 +++++++++--
+ drivers/remoteproc/remoteproc_elf_loader.c |    5 +++--
+ drivers/remoteproc/remoteproc_internal.h   |    2 +-
+ include/linux/remoteproc.h                 |    2 ++
+ 4 files changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index c559b95..6074c5f 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -154,11 +154,17 @@ static void rproc_disable_iommu(struct rproc *rproc)
+  * but only on kernel direct mapped RAM memory. Instead, we're just using
+  * here the output of the DMA API, which should be more correct.
+  */
+-void *rproc_da_to_va(struct rproc *rproc, u64 da, int len)
++void *rproc_da_to_va(struct rproc *rproc, u64 da, int len, u32 flags)
+ {
+ 	struct rproc_mem_entry *carveout;
+ 	void *ptr = NULL;
+ 
++	if (rproc->ops->da_to_va) {
++		ptr = rproc->ops->da_to_va(rproc, da, len, flags);
++		if (ptr)
++			goto out;
++	}
++
+ 	list_for_each_entry(carveout, &rproc->carveouts, node) {
+ 		int offset = da - carveout->da;
+ 
+@@ -175,6 +181,7 @@ void *rproc_da_to_va(struct rproc *rproc, u64 da, int len)
+ 		break;
+ 	}
+ 
++out:
+ 	return ptr;
+ }
+ EXPORT_SYMBOL(rproc_da_to_va);
+@@ -441,7 +448,7 @@ static int rproc_handle_trace(struct rproc *rproc, struct fw_rsc_trace *rsc,
+ 	}
+ 
+ 	/* what's the kernel address of this resource ? */
+-	ptr = rproc_da_to_va(rproc, rsc->da, rsc->len);
++	ptr = rproc_da_to_va(rproc, rsc->da, rsc->len, 0);
+ 	if (!ptr) {
+ 		dev_err(dev, "erroneous trace resource entry\n");
+ 		return -EINVAL;
+diff --git a/drivers/remoteproc/remoteproc_elf_loader.c b/drivers/remoteproc/remoteproc_elf_loader.c
+index e038ea7..c7d2cf3 100644
+--- a/drivers/remoteproc/remoteproc_elf_loader.c
++++ b/drivers/remoteproc/remoteproc_elf_loader.c
+@@ -183,7 +183,7 @@ rproc_elf_load_segments(struct rproc *rproc, const struct firmware *fw)
+ 		}
+ 
+ 		/* grab the kernel address for this device address */
+-		ptr = rproc_da_to_va(rproc, da, memsz);
++		ptr = rproc_da_to_va(rproc, da, memsz, phdr->p_flags);
+ 		if (!ptr) {
+ 			dev_err(dev, "bad phdr da 0x%x mem 0x%x\n", da, memsz);
+ 			ret = -EINVAL;
+@@ -325,7 +325,8 @@ rproc_elf_find_loaded_rsc_table(struct rproc *rproc, const struct firmware *fw)
+ 	if (!shdr)
+ 		return NULL;
+ 
+-	return rproc_da_to_va(rproc, shdr->sh_addr, shdr->sh_size);
++	return rproc_da_to_va(rproc, shdr->sh_addr, shdr->sh_size,
++				shdr->sh_flags);
+ }
+ 
+ /**
+diff --git a/drivers/remoteproc/remoteproc_internal.h b/drivers/remoteproc/remoteproc_internal.h
+index a54e82e..65b4313 100644
+--- a/drivers/remoteproc/remoteproc_internal.h
++++ b/drivers/remoteproc/remoteproc_internal.h
+@@ -68,7 +68,7 @@ void rproc_exit_debugfs(void);
+ void rproc_free_vring(struct rproc_vring *rvring);
+ int rproc_alloc_vring(struct rproc_vdev *rvdev, int i);
+ 
+-void *rproc_da_to_va(struct rproc *rproc, u64 da, int len);
++void *rproc_da_to_va(struct rproc *rproc, u64 da, int len, u32 flags);
+ int rproc_trigger_recovery(struct rproc *rproc);
+ 
+ static inline
+diff --git a/include/linux/remoteproc.h b/include/linux/remoteproc.h
+index 99c1e5c..f68a6f5 100644
+--- a/include/linux/remoteproc.h
++++ b/include/linux/remoteproc.h
+@@ -384,6 +384,7 @@ struct rproc;
+  * @stop:	power off the device
+  * @kick:	kick a virtqueue (virtqueue id given as a parameter)
+  * @handle_custom_rsc:	hook to handle device specific resource table entries
++ * @da_to_va:	optional platform hook to perform address translations
+  */
+ struct rproc_ops {
+ 	int (*start)(struct rproc *rproc);
+@@ -391,6 +392,7 @@ struct rproc_ops {
+ 	void (*kick)(struct rproc *rproc, int vqid);
+ 	int (*handle_custom_rsc)(struct rproc *rproc,
+ 				 struct fw_rsc_custom *rsc);
++	void *(*da_to_va)(struct rproc *rproc, u64 da, int len, u32 flags);
+ };
+ 
+ /**
+-- 
+1.7.9.5
+

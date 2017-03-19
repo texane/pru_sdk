@@ -1,0 +1,62 @@
+From a073afbe7e4555b589bfddaff3bbcbd32e57280b Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Thu, 15 May 2014 22:37:38 -0500
+Subject: [PATCH 13/21] remoteproc/core: introduce post loading handler
+
+PRU custom resource handler for interrupts requires the event channel
+information to be loaded into device memory, but the current core
+code has the firmware segments loaded only after handling of the
+loading handlers. Introduce a post loading handler, and process the
+custom resource handler in this.
+
+TODO: We may have to introduce the ability to process a custom resource
+both before and after loading segments, as it really depends on what
+is implemented within these handlers.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ drivers/remoteproc/remoteproc_core.c |   14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index 6074c5f..c692312 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -832,7 +832,6 @@ static rproc_handle_resource_t rproc_loading_handlers[RSC_LAST] = {
+ 	[RSC_DEVMEM] = (rproc_handle_resource_t)rproc_handle_devmem,
+ 	[RSC_TRACE] = (rproc_handle_resource_t)rproc_handle_trace,
+ 	[RSC_INTMEM] = (rproc_handle_resource_t)rproc_handle_intmem,
+-	[RSC_CUSTOM] = (rproc_handle_resource_t)rproc_handle_custom_rsc,
+ 	[RSC_VDEV] = NULL, /* VDEVs were handled upon registrarion */
+ };
+ 
+@@ -844,6 +843,10 @@ static rproc_handle_resource_t rproc_count_vrings_handler[RSC_LAST] = {
+ 	[RSC_VDEV] = (rproc_handle_resource_t)rproc_count_vrings,
+ };
+ 
++static rproc_handle_resource_t rproc_post_loading_handlers[RSC_LAST] = {
++	[RSC_CUSTOM] = (rproc_handle_resource_t)rproc_handle_custom_rsc,
++};
++
+ /* handle firmware resource entries before booting the remote processor */
+ static int rproc_handle_resources(struct rproc *rproc, int len,
+ 				  rproc_handle_resource_t handlers[RSC_LAST])
+@@ -1032,6 +1035,15 @@ static int rproc_fw_boot(struct rproc *rproc, const struct firmware *fw)
+ 
+ 	memcpy(loaded_table, rproc->cached_table, tablesz);
+ 
++	/* handle fw resources which require fw segments to be loaded*/
++	ret = rproc_handle_resources(rproc, tablesz,
++				     rproc_post_loading_handlers);
++	if (ret) {
++		dev_err(dev, "Failed to process post-loading resources: %d\n",
++			ret);
++		goto clean_up;
++	}
++
+ 	/* power up the remote processor */
+ 	ret = rproc->ops->start(rproc);
+ 	if (ret) {
+-- 
+1.7.9.5
+

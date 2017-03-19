@@ -59,7 +59,9 @@ int main(int ac, char** av)
   uint32_t x[8];
   const size_t n = sizeof(x) / sizeof(x[0]);
   size_t i;
-
+  
+  printf("n: %u \n",n);
+  
   prussdrv_init();
 
   if (prussdrv_open(PRU_EVTOUT_0))
@@ -67,18 +69,35 @@ int main(int ac, char** av)
     printf("prussdrv_open open failed\n");
     return -1;
   }
-
-  prussdrv_pruintc_init(&pruss_intc_initdata);
+ if (prussdrv_pruintc_init(&pruss_intc_initdata))
+  {
+    printf("prussdrv_pruintc_init failed\n");
+    return -1;
+  }
+  else
+  {
+    printf("prussdrv_pruintc_init success\n");
+  }
 
   /* zero_words(n); */
 
-#define PRU_NUM 0
+#define PRU_NUM 1
 
   /* write data from data.bin */
-  prussdrv_load_datafile(PRU_NUM, "./data.bin");
+  //prussdrv_load_datafile(PRU_NUM, "./data.bin");
 
+  if (prussdrv_load_datafile(PRU_NUM, "./data.bin"))
+  {
+    printf("prussdrv_load_datafile failed\n");
+  //  return -1;
+  }
+  else
+  {
+    printf("prussdrv_load_datafile success\n");
+  }
   /* execute code on pru0 */
   prussdrv_exec_program_at(PRU_NUM, "./text.bin", START_ADDR);
+ // prussdrv_exec_program(PRU_NUM, "./text.bin");
 
   signal(SIGINT, on_sigint);
   while (is_sigint == 0)
@@ -87,7 +106,8 @@ int main(int ac, char** av)
     read_words(x, n);
     for (i = 0; i != n; ++i)
     {
-      printf("0x%08x (%f)\n", x[i], *((float*)(x + i)));
+      //printf("mem 0x%08x: (%f)\n", x[i], *((float*)(x + i)));
+      printf("mem 0x%08x: (%x)\n", x[i], *(x + i));
     }
     printf("\n");
   }

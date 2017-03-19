@@ -1,0 +1,91 @@
+From f8e5a06fdf73428416238b3fd2c1732dbb9a688b Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Thu, 15 May 2014 19:37:31 -0500
+Subject: [PATCH 02/21] remoteproc: use a flag to detect the presence of IOMMU
+
+The remoteproc driver core currently relies on iommu_present() on
+the bus the device is on, to perform MMU management. However, this
+logic doesn't scale for multi-arch, especially for processors that
+do not have an IOMMU. Replace this logic instead by using a h/w
+capability flag for the presence of IOMMU in the rproc structure.
+
+The individual platform implementations are required to set this
+flag appropriately. The default setting is to not have an MMU.
+
+The OMAP remoteproc driver is updated while at this, to maintain
+the functionality with the IOMMU detection logic change in this
+patch.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ drivers/remoteproc/omap_remoteproc.c |    6 ++++++
+ drivers/remoteproc/remoteproc_core.c |   15 ++-------------
+ include/linux/remoteproc.h           |    2 ++
+ 3 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/remoteproc/omap_remoteproc.c b/drivers/remoteproc/omap_remoteproc.c
+index feb803e..1cdbd05 100644
+--- a/drivers/remoteproc/omap_remoteproc.c
++++ b/drivers/remoteproc/omap_remoteproc.c
+@@ -220,6 +220,12 @@ static int omap_rproc_probe(struct platform_device *pdev)
+ 
+ 	oproc = rproc->priv;
+ 	oproc->rproc = rproc;
++	/*
++	 * All existing OMAP IPU and DSP processors do have an MMU, and
++	 * are expected to use MMU, so this statement suffices.
++	 * XXX: Replace this logic if and when a need arises.
++	 */
++	rproc->has_iommu = true;
+ 
+ 	platform_set_drvdata(pdev, rproc);
+ 
+diff --git a/drivers/remoteproc/remoteproc_core.c b/drivers/remoteproc/remoteproc_core.c
+index cb8bd30..5322409 100644
+--- a/drivers/remoteproc/remoteproc_core.c
++++ b/drivers/remoteproc/remoteproc_core.c
+@@ -95,19 +95,8 @@ static int rproc_enable_iommu(struct rproc *rproc)
+ 	struct device *dev = rproc->dev.parent;
+ 	int ret;
+ 
+-	/*
+-	 * We currently use iommu_present() to decide if an IOMMU
+-	 * setup is needed.
+-	 *
+-	 * This works for simple cases, but will easily fail with
+-	 * platforms that do have an IOMMU, but not for this specific
+-	 * rproc.
+-	 *
+-	 * This will be easily solved by introducing hw capabilities
+-	 * that will be set by the remoteproc driver.
+-	 */
+-	if (!iommu_present(dev->bus)) {
+-		dev_dbg(dev, "iommu not found\n");
++	if (!rproc->has_iommu) {
++		dev_dbg(dev, "iommu not present\n");
+ 		return 0;
+ 	}
+ 
+diff --git a/include/linux/remoteproc.h b/include/linux/remoteproc.h
+index b40ed9c..aa6ae96 100644
+--- a/include/linux/remoteproc.h
++++ b/include/linux/remoteproc.h
+@@ -442,6 +442,7 @@ enum rproc_crash_type {
+  * @table_ptr: pointer to the resource table in effect
+  * @cached_table: copy of the resource table
+  * @table_csum: checksum of the resource table
++ * @has_iommu: flag to indicate if remote processor is behind an MMU
+  * @fw_version: human readable version information extracted from f/w
+  */
+ struct rproc {
+@@ -474,6 +475,7 @@ struct rproc {
+ 	struct resource_table *table_ptr;
+ 	struct resource_table *cached_table;
+ 	u32 table_csum;
++	bool has_iommu;
+ 	char *fw_version;
+ };
+ 
+-- 
+1.7.9.5
+

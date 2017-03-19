@@ -1,0 +1,43 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* identification */
+	part-number = "pruss_enable";
+	version = "00A0";
+	
+	/* state the resources this cape uses */
+	exclusive-use =
+		/* the pin header uses */
+		"P8.21",	/* pru1: pr1_pru1_pru_r30_12 */
+		"P8.20",	/* pru1: pr1_pru1_pru_r30_13 */
+
+		/* the hardware IP uses */
+		"pru0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			      
+			pru_pru_pins: pinmux_pru_pru_pins {
+				pinctrl-single,pins = <
+				//	0x1a4 0x25	/* mcasp0_fsr.pr1_pru0_pru_r30_5, MODE5 | OUTPUT | PRU */
+					0x080 0x25	/* pr1_pru1_pru_r30_12, MODE5 | OUTPUT | PRU */
+					0x084 0x25	/* pr1_pru1_pru_r30_13, MODE5 | OUTPUT | PRU */
+				>;
+			};
+		};
+	};
+	
+ 	fragment@2 {
+  		   target = <&pruss>;
+		   __overlay__ {
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pru_pru_pins>;
+    	           };
+        };
+
+};

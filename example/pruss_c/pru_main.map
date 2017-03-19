@@ -1,0 +1,98 @@
+******************************************************************************
+                     PRU Linker Unix v2.1.0                    
+******************************************************************************
+>> Linked Tue Dec  2 10:02:07 2014
+
+OUTPUT FILE NAME:   <pru_main.elf>
+ENTRY POINT SYMBOL: "_c_int00_noinit_noargs_noexit"  address: 00000394
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+PAGE 0:
+  PRUIMEM               00000000   00001000  000003b8  00000c48  RWIX
+
+PAGE 1:
+  PRUDMEM               00000000   00001000  00000100  00000f00  RWIX
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.text      0    00000000    000003b8     
+                  00000000    000001c8     rtspruv2_le.lib : mpyf.obj (.text:__pruabi_mpyf)
+                  000001c8    000000a8                     : frcmpyf.obj (.text:__TI_frcmpyf)
+                  00000270    00000070     pru_main.obj (.text:main)
+                  000002e0    00000040     pru_hal.obj (.text:shm_init)
+                  00000320    00000024     rtspruv2_le.lib : mpyi.obj (.text:__pruabi_mpyi)
+                  00000344    0000001c     pru_hal.obj (.text:shm_write_float)
+                  00000360    0000001c     pru_hal.obj (.text:shm_write_uint32)
+                  0000037c    00000018     pru_hal.obj (.text:ocp_init)
+                  00000394    00000014     rtspruv2_le.lib : boot_special.obj (.text:_c_int00_noinit_noargs_noexit)
+                  000003a8    00000008                     : exit.obj (.text:abort)
+                  000003b0    00000008                     : exit.obj (.text:loader_exit)
+
+.stack     1    00000000    00000100     UNINITIALIZED
+                  00000000    00000004     rtspruv2_le.lib : boot.obj (.stack)
+                  00000004    000000fc     --HOLE--
+
+.cinit     1    00000000    00000000     UNINITIALIZED
+
+
+SEGMENT ATTRIBUTES
+
+    id tag      seg value
+    -- ---      --- -----
+     0 PHA_PAGE 1   1    
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+page  address   name                         
+----  -------   ----                         
+0     000003b0  C$$EXIT                      
+1     00000100  __TI_STACK_END               
+abs   00000100  __TI_STACK_SIZE              
+0     000001c8  __TI_frcmpyf                 
+abs   ffffffff  __binit__                    
+abs   ffffffff  __c_args__                   
+0     00000000  __pruabi_mpyf                
+0     00000320  __pruabi_mpyi                
+0     00000394  _c_int00_noinit_noargs_noexit
+1     00000000  _stack                       
+0     000003a8  abort                        
+abs   ffffffff  binit                        
+0     00000270  main                         
+0     0000037c  ocp_init                     
+0     000002e0  shm_init                     
+0     00000344  shm_write_float              
+0     00000360  shm_write_uint32             
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+page  address   name                         
+----  -------   ----                         
+0     00000000  __pruabi_mpyf                
+0     000001c8  __TI_frcmpyf                 
+0     00000270  main                         
+0     000002e0  shm_init                     
+0     00000320  __pruabi_mpyi                
+0     00000344  shm_write_float              
+0     00000360  shm_write_uint32             
+0     0000037c  ocp_init                     
+0     00000394  _c_int00_noinit_noargs_noexit
+0     000003a8  abort                        
+0     000003b0  C$$EXIT                      
+1     00000000  _stack                       
+1     00000100  __TI_STACK_END               
+abs   00000100  __TI_STACK_SIZE              
+abs   ffffffff  __binit__                    
+abs   ffffffff  __c_args__                   
+abs   ffffffff  binit                        
+
+[17 symbols]

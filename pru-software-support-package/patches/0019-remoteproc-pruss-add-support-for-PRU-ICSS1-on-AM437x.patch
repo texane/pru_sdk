@@ -1,0 +1,120 @@
+From 963c7dfa493f0d9f33af4eb9cf2b119c72ceadf3 Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Wed, 4 Jun 2014 16:13:11 -0500
+Subject: [PATCH 19/21] remoteproc/pruss: add support for PRU-ICSS1 on AM437x
+ SoCs
+
+Enhance the PRUSS remoteproc driver to support the PRU-ICSS1
+sub-system on the AM437x family of SoCs. AM437x has two PRU-ICSS
+instances, and support has been added only for PRU-ICSS1 at the
+moment. PRU-ICSS1 on AM437x is very similar to the PRU-ICSS on
+AM33xx except for few minor differences - increased Instruction
+RAM, increased Shared Data RAM2, and 1 less interrupt towards
+the MPU INTC.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ .../bindings/remoteproc/ti,pruss-remoteproc.txt    |    1 +
+ drivers/remoteproc/Kconfig                         |    2 +-
+ drivers/remoteproc/pruss_remoteproc.c              |   24 +++++++++++++++++---
+ 3 files changed, 23 insertions(+), 4 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/remoteproc/ti,pruss-remoteproc.txt b/Documentation/devicetree/bindings/remoteproc/ti,pruss-remoteproc.txt
+index 1bdf0ae..6218109 100644
+--- a/Documentation/devicetree/bindings/remoteproc/ti,pruss-remoteproc.txt
++++ b/Documentation/devicetree/bindings/remoteproc/ti,pruss-remoteproc.txt
+@@ -28,6 +28,7 @@ Required Properties:
+ --------------------
+ - compatible     : should be one of,
+                        "ti,am335x-pruss" for AM335x family of SoCs
++                       "ti,am4372-pruss" for AM437x family of SoCs
+ - ti,hwmods      : name of the hwmod associated with the PRUSS instance
+ - reg            : base address and size for each of the sub-modules as
+                    mentioned in reg-names, and in the same order as the
+diff --git a/drivers/remoteproc/Kconfig b/drivers/remoteproc/Kconfig
+index f7ebf6e..de79646 100644
+--- a/drivers/remoteproc/Kconfig
++++ b/drivers/remoteproc/Kconfig
+@@ -120,7 +120,7 @@ config DA8XX_REMOTEPROC
+ 
+ config PRUSS_REMOTEPROC
+         tristate "TI PRUSS remoteproc support"
+-        depends on HAS_DMA && SOC_AM33XX
++        depends on HAS_DMA && (SOC_AM33XX || SOC_AM43XX)
+         select REMOTEPROC
+         select RPMSG
+         default n
+diff --git a/drivers/remoteproc/pruss_remoteproc.c b/drivers/remoteproc/pruss_remoteproc.c
+index 9060174..69b8723 100644
+--- a/drivers/remoteproc/pruss_remoteproc.c
++++ b/drivers/remoteproc/pruss_remoteproc.c
+@@ -140,10 +140,12 @@ struct pru_rproc_platform_data {
+  * struct pruss_private_data - PRUSS driver private data
+  * @num_irqs: number of interrupts to MPU
+  * @host_events: bit mask of PRU host interrupts that are routed to MPU
++ * @aux_data: auxiliary data used for creating the child nodes
+  */
+ struct pruss_private_data {
+ 	int num_irqs;
+ 	int host_events;
++	struct of_dev_auxdata *aux_data;
+ };
+ 
+ struct pru_rproc;
+@@ -1034,8 +1036,7 @@ static int pruss_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, pruss);
+ 
+ 	dev_info(&pdev->dev, "creating platform devices for PRU cores\n");
+-	ret = of_platform_populate(node, NULL, pru_rproc_auxdata_lookup,
+-				   &pdev->dev);
++	ret = of_platform_populate(node, NULL, data->aux_data, &pdev->dev);
+ 
+ 	return ret;
+ 
+@@ -1090,7 +1091,7 @@ static struct pru_rproc_platform_data pru1_rproc_pdata = {
+ };
+ 
+ /* platform data to be added when creating the PRU platform devices */
+-static struct of_dev_auxdata pru_rproc_auxdata_lookup[] = {
++static struct of_dev_auxdata am335x_pru_rproc_auxdata_lookup[] = {
+ 	OF_DEV_AUXDATA("ti,pru-rproc", 0x4a334000, "4a334000.pru0",
+ 		       &pru0_rproc_pdata),
+ 	OF_DEV_AUXDATA("ti,pru-rproc", 0x4a338000, "4a338000.pru1",
+@@ -1098,6 +1099,14 @@ static struct of_dev_auxdata pru_rproc_auxdata_lookup[] = {
+ 	{ /* sentinel */ },
+ };
+ 
++static struct of_dev_auxdata am4372_pru_rproc_auxdata_lookup[] = {
++	OF_DEV_AUXDATA("ti,pru-rproc", 0x54434000, "54434000.pru0",
++		       &pru0_rproc_pdata),
++	OF_DEV_AUXDATA("ti,pru-rproc", 0x54438000, "54438000.pru1",
++		       &pru1_rproc_pdata),
++	{ /* sentinel */ },
++};
++
+ static const struct of_device_id pru_rproc_match[] = {
+ 	{ .compatible = "ti,pru-rproc", .data = NULL, },
+ 	{},
+@@ -1123,10 +1132,19 @@ static struct pruss_private_data am335x_priv_data = {
+ 	.num_irqs = 8,
+ 	.host_events = (BIT(2) | BIT(3) | BIT(4) | BIT(5) |
+ 			BIT(6) | BIT(7) | BIT(8) | BIT(9)),
++	.aux_data = am335x_pru_rproc_auxdata_lookup,
++};
++
++static struct pruss_private_data am4372_priv_data = {
++	.num_irqs = 7,
++	.host_events = (BIT(2) | BIT(3) | BIT(4) | BIT(5) |
++			BIT(6) | BIT(8) | BIT(9)),
++	.aux_data = am4372_pru_rproc_auxdata_lookup,
+ };
+ 
+ static const struct of_device_id pruss_of_match[] = {
+ 	{ .compatible = "ti,am335x-pruss", .data = &am335x_priv_data, },
++	{ .compatible = "ti,am4372-pruss", .data = &am4372_priv_data, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, pruss_of_match);
+-- 
+1.7.9.5
+

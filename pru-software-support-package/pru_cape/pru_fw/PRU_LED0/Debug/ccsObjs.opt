@@ -1,0 +1,1 @@
+"./PRU_LED0.obj" "../link.cmd" -l"libc.a" 

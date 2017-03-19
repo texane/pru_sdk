@@ -1,0 +1,1 @@
+"./PRU_access_const_table.obj" "../link.cmd" -l"libc.a" 

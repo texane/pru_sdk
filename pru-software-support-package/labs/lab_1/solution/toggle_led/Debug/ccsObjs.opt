@@ -1,0 +1,1 @@
+"./main.obj" "../link.cmd" -l"libc.a" 

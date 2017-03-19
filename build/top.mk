@@ -1,6 +1,10 @@
-CROSS_COMPILE ?= /segfs/linux/dance_sdk/toolchain/arm-buildroot-linux-uclibcgnueabi/bin/arm-buildroot-linux-uclibcgnueabi-
+C_FILES := host_main.c ../common/mio.c
+DTS_FILES := pru_enable-00A0.dtsi
+C_FLAGS := -DSTART_ADDR=$(START_ADDR)
 
-PRU_SDK_DIR ?= /segfs/linux/pru_sdk
+PRU_SDK_DIR ?= $(shell pwd)/../..
+
+CROSS_COMPILE ?= /opt/gcc-linaro-arm-linux-gnueabihf-4.7-2013.03-20130313_linux/bin/arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)gcc
@@ -16,13 +20,16 @@ L_LIBS += -lprussdrv
 
 BIN_FILES := $(P_FILES:.p=.bin)
 O_FILES := $(C_FILES:.c=.o)
-DTBO_FILES := $(DTS_FILES:.dts=.dtbo)
+DTBO_FILES := $(DTS_FILES:.dtsi=.dtbo)
+
+BUILD_DIR = build
 
 all:	main $(BIN_FILES) $(DTBO_FILES)
 
 main:	$(O_FILES)
-	$(LD) -static -o $@ $(O_FILES) $(L_FLAGS) $(L_LIBS)
-	$(STRIP) $@
+	$(LD) -static -o $(BUILD_DIR)/$@ $(O_FILES) $(L_FLAGS) $(L_LIBS)
+	$(STRIP) $(BUILD_DIR)/$@
+	rm *.o
 
 %.bin : %.p
 	$(PASM) -V2 -I$(PRU_SDK_DIR)/include -b $<
@@ -30,7 +37,7 @@ main:	$(O_FILES)
 %.o : %.c
 	$(CC) $(C_FLAGS) -c -o $@ $<
 
-%.dtbo : %.dts
+%.dtbo : %.dtsi
 	$(DTC) -@ -O dtb -o $@ $<
 
 .PHONY	: clean all
@@ -39,3 +46,4 @@ clean	:
 	-rm -f $(BIN_FILES)
 	-rm -f $(DTBO_FILES)
 	-rm -f main
+	

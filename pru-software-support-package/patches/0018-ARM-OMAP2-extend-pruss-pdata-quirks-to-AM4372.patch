@@ -1,0 +1,50 @@
+From b005e90e6eff18e0b45db6720881c3dba714a603 Mon Sep 17 00:00:00 2001
+From: Suman Anna <s-anna@ti.com>
+Date: Wed, 4 Jun 2014 15:57:11 -0500
+Subject: [PATCH 18/21] ARM: OMAP2+: extend pruss pdata-quirks to AM4372
+
+The omap_device API is needed to perform the reset management for
+any IP instances with PRCM RSTCTRL registers (hard reset lines).
+This API is limited to the mach-omap2 layer, and cannot be exposed
+to drivers layer directly.
+
+AM4372 requires the same functional reset management with PRUSS
+as on AM33xx, so extend the AM33xx pruss pdata quirks to AM4372
+as well. AM33xx relied on pdata quirks and platform data ops for
+the PRUSS IP to plumb the required omap_device API, with the PRUSS
+remoteproc driver using the pdata ops to achieve the required reset
+functionality. This was implemented this way as there is no separate
+reset driver at the moment.
+
+Signed-off-by: Suman Anna <s-anna@ti.com>
+---
+ arch/arm/mach-omap2/pdata-quirks.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-omap2/pdata-quirks.c b/arch/arm/mach-omap2/pdata-quirks.c
+index b1b3b8d..2cec2715 100644
+--- a/arch/arm/mach-omap2/pdata-quirks.c
++++ b/arch/arm/mach-omap2/pdata-quirks.c
+@@ -21,7 +21,7 @@ struct pdata_init {
+ 	void (*fn)(void);
+ };
+ 
+-#ifdef CONFIG_SOC_AM33XX
++#if defined(CONFIG_SOC_AM33XX) || defined(CONFIG_SOC_CONFIG_SOC_AM43XX)
+ static struct pruss_platform_data pruss_pdata = {
+ 	.reset_name = "pruss",
+ 	.assert_reset = omap_device_assert_hardreset,
+@@ -42,6 +42,10 @@ static struct of_dev_auxdata omap_auxdata_lookup[] __initdata = {
+ 	OF_DEV_AUXDATA("ti,am335x-pruss", 0x4a300000, "4a300000.pruss",
+ 		       &pruss_pdata),
+ #endif
++#ifdef CONFIG_SOC_AM43XX
++	OF_DEV_AUXDATA("ti,am4372-pruss", 0x54400000, "54400000.pruss",
++		       &pruss_pdata),
++#endif
+ 	{ /* sentinel */ },
+ };
+ 
+-- 
+1.7.9.5
+

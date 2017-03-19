@@ -1,0 +1,1 @@
+"./PRU_edmaConfig.obj" "../link.cmd" -l"libc.a" 
